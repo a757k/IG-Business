@@ -4,9 +4,11 @@ exports.handler = async (event) => {
     return reply(405, { error: 'Method not allowed.' });
   }
 
-  if (!process.env.OPENAI_API_KEY) {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
     return reply(503, {
-      error: 'AI Tutor is not configured yet. Add OPENAI_API_KEY in Netlify environment variables.'
+      error: 'AI Tutor is not configured. Add GEMINI_API_KEY in Netlify environment variables.'
     });
   }
 
@@ -40,19 +42,36 @@ exports.handler = async (event) => {
 
   try {
     const response = await fetch(
-      'https://api.openai.com/v1/responses',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent',
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+          'x-goog-api-key': apiKey
         },
         body: JSON.stringify({
-          model: process.env.OPENAI_MODEL || 'gpt-4.1-mini',
-          instructions:
-            'You are a careful, supportive tutor for Pearson Edexcel International GCSE Business (4BS1). Explain concepts in clear student-friendly English. Use accurate business terminology, a short relevant example, and step-by-step chains of reasoning. For exam technique, explain how to apply knowledge to the case and develop consequences. Do not claim your response is an official mark scheme. If uncertain about a specification detail, say so and advise checking the current Pearson specification. Keep answers focused and do not answer unrelated requests.',
-          input: `Selected syllabus topic: ${topic}\nStudent question: ${question}`,
-          max_output_tokens: 800
+          systemInstruction: {
+            parts: [{
+              text: [
+                'You are a careful, supportive tutor for Pearson Edexcel International GCSE Business (4BS1).',
+                'Explain concepts in clear, student-friendly English.',
+                'Use accurate business terminology, relevant examples, and step-by-step chains of reasoning.',
+                'For exam technique, explain how to apply knowledge to the case and develop consequences.',
+                'Do not claim your response is an official mark scheme.',
+                'If uncertain about a specification detail, say so and advise checking the current Pearson specification.',
+                'Keep answers focused on International GCSE Business and do not answer unrelated requests.'
+              ].join(' ')
+            }]
+          },
+          contents: [{
+            role: 'user',
+            parts: [{
+              text: `Selected syllabus topic: ${topic}\nStudent question: ${question}`
+            }]
+          }],
+          generationConfig: {
+            maxOutputTokens: 800
+          }
         })
       }
     );
@@ -60,33 +79,39 @@ exports.handler = async (event) => {
     const data = await response.json();
 
     if (!response.ok) {
-      return reply(
-        response.status === 429 ? 429 : 502,
-        {
-          error:
-            data.error?.message ||
-            'The AI service could not complete the request.'
-        }
-      );
+      if (response.status === 429) {
+        return reply(429, {
+          error: 'The AI Tutor has reached its current usage limit. Please try again later.'
+        });
+      }
+
+      if (response.status === 400 || response.status === 403) {
+        return reply(502, {
+          error: 'Gemini rejected the request. Check your API key, model access, and API settings in Google AI Studio.'
+        });
+      }
+
+      return reply(502, {
+        error: 'The Gemini service could not complete the request. Please try again later.'
+      });
     }
 
-    const answer = (data.output || [])
-      .flatMap(item => item.content || [])
-      .filter(part => part.type === 'output_text')
-      .map(part => part.text)
+    const answer = (data.candidates?.[0]?.content?.parts || [])
+      .map(part => part.text || '')
       .join('\n')
       .trim();
 
     if (!answer) {
       return reply(502, {
-        error: 'The AI service returned an empty answer. Please try again.'
+        error: 'Gemini returned an empty answer. Please try again.'
       });
     }
 
     return reply(200, { answer });
-  } catch (error) {
+
+  } catch {
     return reply(502, {
-      error: 'Unable to reach the AI service. Please try again later.'
+      error: 'Unable to reach Gemini. Please try again later.'
     });
   }
 };
