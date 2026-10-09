@@ -1,5 +1,10 @@
 
-/* Starter learning library. Expand and verify every subtopic against the official Pearson 4BS1 specification before publishing as a complete course. */
+/*
+  Edexcel International GCSE Business (4BS1)
+  Learning library — Part 1: Business activity and influences on business.
+  Original revision explanations. Verify coverage against the current
+  official Pearson specification before describing the course as complete.
+*/
 
 window.BUSINESS_SECTIONS = [
   {id:'all',label:'All sections'},
@@ -12,6 +17,87 @@ window.BUSINESS_SECTIONS = [
 
 window.BUSINESS_TOPICS = [
   {
+    id:'business-activity',
+    section:'business',
+    sectionName:'Business activity and influences on business',
+    title:'Business activity and adding value',
+    summary:'Understand business activity, factors of production and how businesses add value.',
+    definition:'Business activity involves combining resources to produce goods or provide services that satisfy customer needs and wants.',
+    points:[
+      ['Needs and wants','Needs are essentials for living, such as food and shelter. Wants are things people would like to have but do not necessarily need. Businesses identify customer needs and wants to develop products.'],
+      ['Goods and services','Goods are physical products, such as clothes or furniture. Services are activities provided to customers, such as transport, haircuts or education.'],
+      ['Factors of production','Land includes natural resources; labour is human effort; capital includes manufactured resources such as machinery; enterprise is the ability to organise resources and take business risks.'],
+      ['Adding value','Added value is the difference between the selling price of a product and the cost of bought-in materials and components. A business can increase it through branding, quality, convenience, design or customer service.'],
+      ['Why businesses exist','Businesses supply products that customers want, create employment, generate income for owners and may contribute to economic growth.']
+    ],
+    example:'A bakery buys flour, eggs and sugar for QAR 20 and sells the finished cake for QAR 65. Its added value is QAR 45 before considering other costs such as wages, rent and electricity.',
+    examTip:'Do not confuse added value with profit. Added value subtracts bought-in materials and components from the selling price; profit subtracts total business costs from revenue.',
+    keywords:['business activity','needs','wants','goods','services','factors of production','land','labour','capital','enterprise','added value'],
+    question:'A business buys materials for QAR 12 and sells the finished product for QAR 40. Calculate the added value.',
+    answer:'Added value = selling price − cost of bought-in materials = QAR 40 − QAR 12 = QAR 28.'
+  },
+  {
+    id:'classification',
+    section:'business',
+    sectionName:'Business activity and influences on business',
+    title:'Classification of businesses',
+    summary:'Understand primary, secondary and tertiary sectors and how businesses are classified.',
+    definition:'Business classification groups businesses according to the type of economic activity they carry out.',
+    points:[
+      ['Primary sector','Businesses extract or obtain natural resources, such as farming, fishing, forestry and mining.'],
+      ['Secondary sector','Businesses manufacture goods or construct buildings, often using materials obtained from the primary sector.'],
+      ['Tertiary sector','Businesses provide services, including retail, transport, banking, tourism and hairdressing.'],
+      ['Interdependence','Businesses in different sectors often depend on each other. A farm supplies a food manufacturer, which supplies a supermarket.'],
+      ['Changes in sector importance','Economic development, technology, consumer demand and outsourcing can change the relative importance of sectors in a country.']
+    ],
+    example:'A farmer grows wheat in the primary sector, a mill turns it into flour in the secondary sector, and a shop sells flour to customers in the tertiary sector.',
+    examTip:'Identify the actual activity being carried out. A company may operate in more than one sector, so classify the activity described in the question.',
+    keywords:['classification','primary sector','secondary sector','tertiary sector','manufacturing','services','interdependence'],
+    question:'A company manufactures furniture from timber. Which sector is this activity in, and why?',
+    answer:'It is in the secondary sector because the company transforms a natural resource into a manufactured product.'
+  },
+  {
+    id:'enterprise',
+    section:'business',
+    sectionName:'Business activity and influences on business',
+    title:'Enterprise and entrepreneurship',
+    summary:'Explore entrepreneurs, business ideas, risk, reward and the skills needed to start a business.',
+    definition:'An entrepreneur identifies a business opportunity, organises resources and takes risks to establish or develop a business.',
+    points:[
+      ['Identifying opportunities','Entrepreneurs may spot an unmet customer need, a gap in the market or a way to improve an existing product.'],
+      ['Common skills','Useful skills include communication, decision-making, planning, organisation, problem-solving and managing money.'],
+      ['Risk and reward','An entrepreneur may earn profit, gain independence and achieve personal satisfaction, but may also lose invested money or face long working hours.'],
+      ['Innovation','Developing a new product, service or way of working can help a business stand out from competitors. Innovation does not guarantee success.'],
+      ['Why new businesses fail','Possible causes include weak demand, poor cash-flow management, strong competition, inadequate planning and insufficient finance.']
+    ],
+    example:'An entrepreneur notices that students near a school struggle to find affordable healthy lunches. They test demand and create a small lunch-delivery service, but must assess costs, competitors and likely sales.',
+    examTip:'When discussing an entrepreneur’s success, link the skill or decision to a business outcome. For example, research may reduce uncertainty by identifying what customers are willing to buy.',
+    keywords:['enterprise','entrepreneur','risk','reward','innovation','business idea','opportunity','business failure'],
+    question:'Explain one risk an entrepreneur faces when starting a business.',
+    answer:'The entrepreneur may invest personal savings but attract fewer customers than expected. Revenue may then be insufficient to cover costs, causing financial losses and possibly forcing the business to close.'
+  },
+  {
+    id:'business-plans',
+    section:'business',
+    sectionName:'Business activity and influences on business',
+    title:'Business plans',
+    summary:'Learn the purpose, contents, benefits and limitations of a business plan.',
+    definition:'A business plan is a document setting out a business idea, its objectives and how the business intends to operate and achieve those objectives.',
+    points:[
+      ['Business idea and objectives','The plan explains what the business will sell, its intended customers and what it wants to achieve.'],
+      ['Market information','Research about customer demand, competitors and the target market helps assess whether the idea is viable.'],
+      ['Marketing and operations','The plan may explain pricing, promotion, location, suppliers, staffing and how products will be delivered.'],
+      ['Financial forecasts','Expected sales, costs, cash flow and finance requirements help estimate whether the business can meet its payments and may make a profit.'],
+      ['Benefits','Planning can identify problems early, clarify priorities and help persuade lenders or investors that the idea has been considered carefully.'],
+      ['Limitations','Forecasts can be inaccurate, market conditions can change, and a detailed plan cannot guarantee success.']
+    ],
+    example:'Before opening a café, an owner estimates daily sales, calculates rent and wage costs, researches nearby competitors and forecasts whether enough cash will be available during the first few months.',
+    examTip:'A business plan is only as reliable as its assumptions and information. Explain how a particular part of the plan helps the business make a better decision.',
+    keywords:['business plan','objectives','market research','forecast','cash flow','sales forecast','financial planning'],
+    question:'Explain one reason why a business plan may help a new business obtain finance.',
+    answer:'A business plan can show a lender how the business expects to generate sales and repay borrowing. This may increase the lender’s confidence, although finance is not guaranteed.'
+  },
+  {
     id:'objectives',
     section:'business',
     sectionName:'Business activity and influences on business',
@@ -19,15 +105,18 @@ window.BUSINESS_TOPICS = [
     summary:'Understand financial and non-financial objectives and why they change.',
     definition:'Business objectives are the specific goals a business aims to achieve.',
     points:[
-      ['Financial objectives','Survival, profit, sales, market share and financial security.'],
-      ['Non-financial objectives','Social aims, personal satisfaction, challenge, independence and control.'],
-      ['Why objectives change','Market conditions, technology, business performance, legislation and internal factors can change priorities.']
+      ['Survival','A new or struggling business may prioritise remaining in operation and generating enough cash to pay its bills.'],
+      ['Profit','Profit is the amount remaining when total costs are deducted from total revenue. Owners may seek to increase profit to earn a return on their investment.'],
+      ['Sales and market share','A business may aim to increase sales revenue or gain a larger proportion of total sales in its market. Increasing sales does not automatically increase profit.'],
+      ['Financial security','A business may aim to manage borrowing, maintain sufficient cash and reduce financial uncertainty.'],
+      ['Non-financial objectives','These may include independence, personal satisfaction, social or environmental aims, and providing a particular service.'],
+      ['Why objectives change','Business size, market conditions, competition, technology, financial performance and owners’ priorities can change the objectives a business pursues.']
     ],
     example:'A new local bakery may initially focus on survival and building a customer base. Once established, it may aim to increase profit or open another branch.',
-    examTip:'Apply the point to the business in the question. Explain the consequence: objective → decision/action → likely effect on the business.',
-    keywords:['objectives','aims','profit','survival','market share'],
+    examTip:'Apply the point to the business in the question. Explain the consequence: objective → decision or action → likely effect on the business.',
+    keywords:['objectives','aims','profit','survival','sales','market share','financial security','non-financial'],
     question:'Why might a new business prioritise survival over profit?',
-    answer:'A new business may prioritise survival because sales are uncertain and it needs enough cash to pay its costs while building a customer base. If it survives the early stages, it can focus more on profit later.'
+    answer:'A new business may have uncertain sales and needs enough cash to pay its costs while building a customer base. Prioritising survival may help it establish itself before pursuing higher profit.'
   },
   {
     id:'ownership',
@@ -37,36 +126,83 @@ window.BUSINESS_TOPICS = [
     summary:'Compare sole traders, partnerships, limited companies and public corporations.',
     definition:'Ownership describes who legally owns and controls a business or organisation.',
     points:[
-      ['Sole trader','Owned by one person. The owner usually keeps the profit but has unlimited liability.'],
-      ['Partnership','Owned by two or more partners who share responsibilities and profits according to their agreement.'],
-      ['Limited company','A separate legal entity. Shareholders generally have limited liability. Private companies restrict share transfers; public companies can offer shares to the public.'],
-      ['Public corporation','An organisation owned by the state and established to provide a public service or meet public objectives.']
+      ['Sole trader','Owned by one person. The owner usually makes decisions independently and keeps the profit after costs and taxes, but normally has unlimited liability for business debts.'],
+      ['Partnership','Owned by two or more partners who share responsibilities and profits according to their agreement. In a traditional partnership, partners may have unlimited liability.'],
+      ['Private limited company','A company that is legally separate from its owners. Shares are generally held privately and cannot be freely offered to the public. Shareholders generally have limited liability.'],
+      ['Public limited company','A company that can offer shares to the public, subject to legal requirements. It may be able to raise substantial share capital, but faces greater regulation and reporting requirements.'],
+      ['Limited liability','Shareholders generally risk the amount invested in their shares rather than being personally responsible for all company debts, subject to legal exceptions.'],
+      ['Choosing ownership','Owners may consider control, finance, liability, continuity, administration costs and plans for growth.']
     ],
-    example:'A self-employed plumber may choose sole-trader status for simplicity, while a growing company seeking investment may incorporate as a limited company.',
-    examTip:'Do not just list a feature. Link it to the owner’s needs, such as control, risk, finance or continuity.',
-    keywords:['sole trader','partnership','limited liability','private limited company','public limited company','public corporation'],
+    example:'A self-employed plumber may choose sole-trader status for simplicity, while a growing business seeking investment from shareholders may incorporate as a limited company.',
+    examTip:'Do not just list a feature. Link it to the owner’s needs, such as control, risk, finance or future growth. Avoid saying a limited company can never fail.',
+    keywords:['sole trader','partnership','private limited company','public limited company','limited liability','unlimited liability','shareholder'],
     question:'Give one advantage to an owner of setting up a limited company.',
-    answer:'Shareholders generally have limited liability, so their personal assets are protected from business debts beyond the amount they invested, subject to legal exceptions.'
+    answer:'Shareholders generally have limited liability, so their personal assets are protected from company debts beyond the amount invested, subject to legal exceptions.'
   },
   {
     id:'stakeholders',
     section:'business',
     sectionName:'Business activity and influences on business',
     title:'Stakeholders and business influences',
-    summary:'Identify stakeholder groups and how external changes affect decisions.',
+    summary:'Identify stakeholder groups, their objectives and possible conflicts of interest.',
     definition:'A stakeholder is a person or group with an interest in, or affected by, the activities of a business.',
     points:[
-      ['Internal stakeholders','Owners, managers and employees.'],
-      ['External stakeholders','Customers, suppliers, lenders, government and the local community.'],
-      ['Conflicting interests','Employees may want higher wages while owners may want to reduce costs and increase profit.'],
-      ['External influences','Economic conditions, technology, laws, competition and social or environmental expectations can affect decisions.']
+      ['Owners and shareholders','May want profit, growth, dividends, business survival or an increase in the value of their investment.'],
+      ['Employees and managers','May want fair pay, job security, safe conditions, promotion opportunities and a manageable workload.'],
+      ['Customers','Usually want products that offer suitable quality, price, reliability and customer service.'],
+      ['Suppliers and lenders','Suppliers may want prompt payment and continuing orders. Lenders want the business to repay borrowing and interest according to the agreement.'],
+      ['Government and local community','Government may be concerned with tax revenue, employment and compliance with laws. Local communities may value jobs but be concerned about noise, traffic or pollution.'],
+      ['Conflicting interests','Employees may want higher wages while owners want to control costs. Customers may want lower prices while owners want higher profit margins.']
     ],
-    example:'If interest rates rise, a business with a variable-rate loan may face higher repayments, reducing the cash available for expansion.',
-    examTip:'Name the stakeholder or influence, explain how it changes a business decision, then develop the impact on a relevant objective.',
-    keywords:['stakeholder','government','competition','technology','interest rates'],
+    example:'If a factory increases wages, employees may become more motivated, but labour costs may rise and reduce profit unless productivity or sales also increase.',
+    examTip:'Identify the stakeholder, explain what they want, and develop how meeting that interest affects the business or another stakeholder.',
+    keywords:['stakeholder','owners','shareholders','employees','customers','suppliers','lenders','government','community','conflict'],
     question:'Explain one possible conflict between employees and owners.',
-    answer:'Employees may want higher wages to improve their living standards. Higher wages increase the business’s labour costs, which may reduce profit unless productivity or sales also rise.'
+    answer:'Employees may want higher wages to improve their living standards. Higher wages increase labour costs, which may reduce profit unless productivity or sales also rise.'
   },
+  {
+    id:'business-growth',
+    section:'business',
+    sectionName:'Business activity and influences on business',
+    title:'Business growth',
+    summary:'Understand why businesses grow and compare internal and external growth.',
+    definition:'Business growth occurs when a business increases its size or scale of operations, such as by increasing sales, output, employees or the number of locations.',
+    points:[
+      ['Reasons for growth','A business may seek higher profit, a larger market share, economies of scale, greater market power or access to new customers.'],
+      ['Internal growth','The business expands its own operations, for example by opening another branch, increasing capacity or developing new products.'],
+      ['External growth','The business grows by combining with or taking over another business, such as through a merger or acquisition.'],
+      ['Potential benefits','Growth can increase sales, spread fixed costs over more output, strengthen bargaining power and reduce dependence on one product or market.'],
+      ['Potential problems','Expansion may require finance, create communication difficulties, increase management workloads or lead to diseconomies of scale.'],
+      ['Choosing a growth method','A business should consider its finances, management skills, objectives, market conditions and the risks of expanding too quickly.']
+    ],
+    example:'A successful café may grow internally by opening a second branch. Alternatively, it could acquire another café, which may provide an existing customer base but bring integration challenges.',
+    examTip:'Growth is not automatically beneficial. Explain how the chosen method suits the business and consider its costs, risks and ability to manage expansion.',
+    keywords:['growth','internal growth','external growth','merger','acquisition','takeover','economies of scale','diseconomies of scale'],
+    question:'Explain one possible disadvantage of a business growing too quickly.',
+    answer:'Rapid growth may make it harder for managers to supervise employees and maintain consistent quality. Customer complaints could increase, damaging the business’s reputation and reducing repeat sales.'
+  },
+  {
+    id:'external-influences',
+    section:'business',
+    sectionName:'Business activity and influences on business',
+    title:'External influences on businesses',
+    summary:'Understand how economic, legal, technological, competitive and social changes affect decisions.',
+    definition:'External influences are factors outside a business that can affect its decisions, costs, sales and performance.',
+    points:[
+      ['Economic conditions','Changes in inflation, interest rates, unemployment and economic growth can affect business costs, borrowing and customer spending.'],
+      ['Competition','Competitors may force a business to improve quality, change prices, invest in promotion or develop new products.'],
+      ['Technology','New technology can improve productivity, communication and customer convenience, but may require investment and employee training.'],
+      ['Laws and regulation','Businesses must comply with relevant rules, such as employment, consumer protection, health and safety and environmental requirements.'],
+      ['Social and environmental expectations','Changes in customer lifestyles, preferences and environmental awareness may affect demand and business practices.'],
+      ['Responding to change','Businesses can monitor markets, research customer needs, plan for risks and adapt their products or operations.']
+    ],
+    example:'If inflation increases ingredient and electricity costs, a bakery may consider reducing waste, negotiating with suppliers or adjusting prices. Raising prices too much could reduce demand.',
+    examTip:'Do not merely name an external factor. Explain the chain of impact on costs, demand, cash flow, profit or a specific business objective.',
+    keywords:['external influences','inflation','interest rates','competition','technology','legislation','environment','economic growth'],
+    question:'Explain how an increase in interest rates could affect a business with a variable-rate loan.',
+    answer:'Higher interest rates may increase the business’s loan repayments. This leaves less cash available for other spending or expansion and may reduce profit if other factors remain unchanged.'
+  },
+
   {
     id:'recruitment',
     section:'people',
@@ -100,7 +236,7 @@ window.BUSINESS_TOPICS = [
       ['Possible effects','Motivation and training can improve productivity, quality and staff retention, but involve costs.']
     ],
     example:'Sales commission may encourage a salesperson to sell more, but poorly designed targets could encourage unsuitable sales or harm customer service.',
-    examTip:'Explain the mechanism: incentive or training → employee behaviour/skill → productivity, quality, costs or customer satisfaction.',
+    examTip:'Explain the mechanism: incentive or training → employee behaviour or skill → productivity, quality, costs or customer satisfaction.',
     keywords:['motivation','commission','bonus','training','productivity'],
     question:'Explain how training could benefit a business.',
     answer:'Training can improve employees’ skills, allowing them to work more efficiently and make fewer mistakes. This may reduce waste and costs, improving profitability.'
