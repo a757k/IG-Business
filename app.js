@@ -1,21 +1,73 @@
 
 (() => {
+  'use strict';
+
   const $ = (selector) => document.querySelector(selector);
-  const topics = window.BUSINESS_TOPICS;
-  const sections = window.BUSINESS_SECTIONS;
+
+  const topics = Array.isArray(window.BUSINESS_TOPICS)
+    ? window.BUSINESS_TOPICS.filter(Boolean)
+    : [];
+
+  const quizQuestions = Array.isArray(window.BUSINESS_QUIZ)
+    ? window.BUSINESS_QUIZ.filter(Boolean)
+    : [];
+
+  const rawSections = Array.isArray(window.BUSINESS_SECTIONS)
+    ? window.BUSINESS_SECTIONS.filter(Boolean)
+    : [];
+
   const storageKey = 'businessIGCSEProgress_v1';
+
+  // Safely find the page elements used by this application.
+  const requiredElements = [
+    '#sectionFilters',
+    '#searchInput',
+    '#topicGrid',
+    '#noResults',
+    '#quizCard',
+    '#topicDialog',
+    '#dialogContent'
+  ];
+
+  const missingElements = requiredElements.filter(selector => !$(selector));
+
+  if (missingElements.length) {
+    console.error('Missing HTML elements:', missingElements);
+    return;
+  }
+
+  // Build sections from the supplied data if no section list exists.
+  const sections = rawSections.length
+    ? rawSections
+        .filter(section => String(section.id) !== 'all')
+        .map(section => ({
+          id: String(section.id),
+          label: String(section.label || section.name || section.id)
+        }))
+    : [...new Map(
+        topics.map(topic => [
+          String(topic.section ?? 'other'),
+          {
+            id: String(topic.section ?? 'other'),
+            label: String(
+              topic.sectionName || topic.sectionLabel || topic.section || 'Other'
+            )
+          }
+        ])
+      ).values()];
 
   let completed = loadProgress();
   let activeSection = 'all';
   let quizIndex = 0;
-  let quizOrder = shuffle([...window.BUSINESS_QUIZ]);
+  let quizOrder = shuffle([...quizQuestions]);
   let selectedQuizAnswer = null;
 
   function loadProgress() {
     try {
       const value = JSON.parse(localStorage.getItem(storageKey) || '[]');
       return new Set(Array.isArray(value) ? value : []);
-    } catch {
+    } catch (error) {
+      console.warn('Could not load saved progress.', error);
       return new Set();
     }
   }
@@ -23,8 +75,8 @@
   function saveProgress() {
     try {
       localStorage.setItem(storageKey, JSON.stringify([...completed]));
-    } catch {
-      // Browser storage may be disabled.
+    } catch (error) {
+      console.warn('Could not save progress in this browser.', error);
     }
   }
 
@@ -33,57 +85,12 @@
       const j = Math.floor(Math.random() * (i + 1));
       [items[i], items[j]] = [items[j], items[i]];
     }
+
     return items;
   }
 
-  function sectionLabel(id) {
-    return sections.find(s => s.id === id)?.label.replace(/^\d\. /, '') || id;
-  }
-
-  function renderFilters() {
-    $('#sectionFilters').innerHTML = sections.map(s =>
-      `<button class="filter-chip ${s.id === activeSection ? 'active' : ''}" data-section="${s.id}">${s.label}</button>`
-    ).join('');
-
-    $('#sectionFilters').querySelectorAll('button').forEach(button =>
-      button.addEventListener('click', () => {
-        activeSection = button.dataset.section;
-        renderFilters();
-        renderTopics();
-      })
-    );
-  }
-
-  function renderTopics() {
-    const query = $('#searchInput').value.trim().toLowerCase();
-
-    const filtered = topics.filter(t =>
-      (activeSection === 'all' || t.section === activeSection) &&
-      (!query || [t.title, t.summary, t.definition, t.sectionName, ...t.keywords]
-        .join(' ').toLowerCase().includes(query))
-    );
-
-    $('#topicGrid').innerHTML = filtered.map((t, i) =>
-      `<article class="topic-card">
-        <div class="topic-card-top">
-          <span class="topic-number">${String(i + 1).padStart(2, '0')} · ${sectionLabel(t.section)}</span>
-          ${completed.has(t.id) ? '<span class="done-mark">✓ Done</span>' : ''}
-        </div>
-        <h3>${escapeHTML(t.title)}</h3>
-        <p>${escapeHTML(t.summary)}</p>
-        <button data-topic="${t.id}">Study this topic →</button>
-      </article>`
-    ).join('');
-
-    $('#noResults').hidden = filtered.length > 0;
-
-    $('#topicGrid').querySelectorAll('[data-topic]').forEach(button =>
-      button.addEventListener('click', () => openTopic(button.dataset.topic))
-    );
-  }
-
   function escapeHTML(value) {
-    return String(value).replace(/[&<>"']/g, char => ({
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
       '&': '&amp;',
       '<': '&lt;',
       '>': '&gt;',
@@ -92,124 +99,334 @@
     }[char]));
   }
 
+  function getTopicTitle(topic) {
+    return topic.title || topic.name || 'Untitled topic';
+  }
+
+  function getTopicSummary(topic) {
+    return topic.summary || topic.description || 'Open this topic to study its content.';
+  }
+
+  function getTopicSection(topic) {
+    return String(topic.section ?? 'other');
+  }
+
+  function getSectionLabel(id) {
+    const section = sections.find(item => item.id === String(id));
+
+    if (section) {
+      return section.label.replace(/^\d+\.\s*/, '');
+    }
+
+    const topic = topics.find(item => getTopicSection(item) === String(id));
+
+    return topic?.sectionName || topic?.sectionLabel || String(id);
+  }
+
+  function renderFilters() {
+    const filters = [
+      { id: 'all', label: 'All topics' },
+      ...sections
+    ];
+
+    $('#sectionFilters').innerHTML = filters.map(section => `
+      <button
+        type="button"
+        class="filter-chip ${String(section.id) === activeSection ? 'active' : ''}"
+        data-section="${escapeHTML(section.id)}"
+        aria-pressed="${String(section.id) === activeSection}"
+      >${escapeHTML(section.label)}</button>
+    `).join('');
+
+    $('#sectionFilters').querySelectorAll('[data-section]').forEach(button => {
+      button.addEventListener('click', () => {
+        activeSection = button.dataset.section;
+        renderFilters();
+        renderTopics();
+      });
+    });
+  }
+
+  function renderTopics() {
+    const query = $('#searchInput').value.trim().toLowerCase();
+
+    const filtered = topics.filter(topic => {
+      const matchesSection =
+        activeSection === 'all' ||
+        getTopicSection(topic) === activeSection;
+
+      const keywords = Array.isArray(topic.keywords)
+        ? topic.keywords
+        : [];
+
+      const searchableText = [
+        getTopicTitle(topic),
+        getTopicSummary(topic),
+        topic.definition || '',
+        topic.sectionName || '',
+        topic.sectionLabel || '',
+        ...keywords
+      ].join(' ').toLowerCase();
+
+      return matchesSection && (!query || searchableText.includes(query));
+    });
+
+    if (topics.length === 0) {
+      $('#topicGrid').innerHTML = `
+        <p class="empty-state">
+          No topic data has loaded. Check that content.js, content2.js,
+          content3.js and content4.js load successfully before app.js.
+        </p>
+      `;
+
+      $('#noResults').hidden = true;
+      updateProgress();
+      return;
+    }
+
+    $('#topicGrid').innerHTML = filtered.map((topic, index) => {
+      const title = getTopicTitle(topic);
+      const summary = getTopicSummary(topic);
+      const isCompleted = completed.has(topic.id);
+
+      return `
+        <article class="topic-card">
+          <div class="topic-card-top">
+            <span class="topic-number">
+              ${String(index + 1).padStart(2, '0')} ·
+              ${escapeHTML(getSectionLabel(getTopicSection(topic)))}
+            </span>
+            ${isCompleted ? '<span class="done-mark">✓ Done</span>' : ''}
+          </div>
+
+          <h3>${escapeHTML(title)}</h3>
+          <p>${escapeHTML(summary)}</p>
+
+          <button type="button" data-topic="${escapeHTML(topic.id)}">
+            Study this topic →
+          </button>
+        </article>
+      `;
+    }).join('');
+
+    $('#noResults').hidden = filtered.length > 0;
+
+    $('#topicGrid').querySelectorAll('[data-topic]').forEach(button => {
+      button.addEventListener('click', () => openTopic(button.dataset.topic));
+    });
+
+    updateProgress();
+  }
+
   function openTopic(id) {
-    const t = topics.find(topic => topic.id === id);
-    if (!t) return;
+    const topic = topics.find(item => String(item.id) === String(id));
+
+    if (!topic) {
+      console.error('Topic not found:', id);
+      return;
+    }
+
+    const points = Array.isArray(topic.points) ? topic.points : [];
+    const isCompleted = completed.has(topic.id);
+
+    const pointsHTML = points.length
+      ? points.map(point => {
+          if (Array.isArray(point)) {
+            return `
+              <li>
+                <strong>${escapeHTML(point[0] || '')}:</strong>
+                ${escapeHTML(point[1] || '')}
+              </li>
+            `;
+          }
+
+          if (point && typeof point === 'object') {
+            return `
+              <li>
+                <strong>${escapeHTML(point.title || point.name || '')}:</strong>
+                ${escapeHTML(point.explanation || point.description || '')}
+              </li>
+            `;
+          }
+
+          return `<li>${escapeHTML(point)}</li>`;
+        }).join('')
+      : '<li>Detailed learning points have not been added to this topic yet.</li>';
+
+    const title = getTopicTitle(topic);
 
     $('#dialogContent').innerHTML = `
-      <p class="eyebrow">${escapeHTML(t.sectionName)}</p>
-      <h2>${escapeHTML(t.title)}</h2>
-      <p>${escapeHTML(t.summary)}</p>
+      <p class="eyebrow">
+        ${escapeHTML(topic.sectionName || getSectionLabel(getTopicSection(topic)))}
+      </p>
+
+      <h2>${escapeHTML(title)}</h2>
+      <p>${escapeHTML(getTopicSummary(topic))}</p>
 
       <div class="definition-box">
         <strong>Key definition</strong>
-        <p>${escapeHTML(t.definition)}</p>
+        <p>${escapeHTML(topic.definition || 'A definition has not been added yet.')}</p>
       </div>
 
       <h3>What you need to know</h3>
-      <ul>${t.points.map(p =>
-        `<li><strong>${escapeHTML(p[0])}:</strong> ${escapeHTML(p[1])}</li>`
-      ).join('')}</ul>
+      <ul>${pointsHTML}</ul>
 
       <h3>Business example</h3>
-      <p>${escapeHTML(t.example)}</p>
+      <p>${escapeHTML(topic.example || 'A business example has not been added yet.')}</p>
 
       <div class="exam-tip">
-        <strong>Exam technique:</strong> ${escapeHTML(t.examTip)}
+        <strong>Exam technique:</strong>
+        ${escapeHTML(topic.examTip || 'Explain your point and apply it to the business in the question.')}
       </div>
 
       <h3>Check your understanding</h3>
-      <p><strong>${escapeHTML(t.question)}</strong></p>
+      <p><strong>${escapeHTML(topic.question || 'What is the most important idea you learned from this topic?')}</strong></p>
+
       <details>
         <summary>Reveal a sample answer</summary>
-        <p>${escapeHTML(t.answer)}</p>
+        <p>${escapeHTML(topic.answer || 'Try answering in your own words first, using the key definition and a relevant example.')}</p>
       </details>
 
-      <button id="markTopicDone" class="mark-done">
-        ${completed.has(t.id) ? 'Mark as not completed' : 'Mark topic as completed ✓'}
+      <button type="button" id="markTopicDone" class="mark-done">
+        ${isCompleted ? 'Mark as not completed' : 'Mark topic as completed ✓'}
       </button>
     `;
 
-    $('#topicDialog').showModal();
+    const dialog = $('#topicDialog');
+
+    if (!dialog.open) {
+      dialog.showModal();
+    }
 
     $('#markTopicDone').addEventListener('click', () => {
-      if (completed.has(t.id)) completed.delete(t.id);
-      else completed.add(t.id);
+      if (completed.has(topic.id)) {
+        completed.delete(topic.id);
+      } else {
+        completed.add(topic.id);
+      }
 
       saveProgress();
-      updateProgress();
       renderTopics();
-      openTopic(t.id);
+      updateProgress();
+      openTopic(topic.id);
     });
   }
 
   function updateProgress() {
-    const count = topics.filter(t => completed.has(t.id)).length;
-    const percent = Math.round(count / topics.length * 100);
+    const count = topics.filter(topic => completed.has(topic.id)).length;
+    const total = topics.length;
+    const percent = total > 0 ? Math.round(count / total * 100) : 0;
 
     $('#heroCompleted').textContent = count;
     $('#heroProgressBar').style.width = `${percent}%`;
+
     $('#heroProgressText').textContent = count
       ? `${percent}% complete — keep going.`
       : 'Start a topic to build your progress.';
 
     $('#progressCount').textContent = count;
-    $('#totalTopics').textContent = topics.length;
+    $('#totalTopics').textContent = total;
     $('#mainProgressBar').style.width = `${percent}%`;
+
     $('#mainProgressText').textContent = count
-      ? `You've completed ${percent}% of the topics in this starter library.`
+      ? `You've completed ${percent}% of the topics in this library.`
       : 'Your learning progress will appear here.';
   }
 
   function renderQuiz() {
-    const q = quizOrder[quizIndex];
+    const card = $('#quizCard');
 
-    $('#quizCard').innerHTML = `
-      <span class="quiz-meta">QUESTION ${quizIndex + 1} OF ${quizOrder.length}</span>
-      <h3>${escapeHTML(q.q)}</h3>
+    if (quizOrder.length === 0) {
+      card.innerHTML = `
+        <p class="empty-state">
+          No quiz questions have loaded. Check the content files and
+          confirm that they add questions to BUSINESS_QUIZ.
+        </p>
+      `;
+      return;
+    }
+
+    quizIndex = Math.min(quizIndex, quizOrder.length - 1);
+
+    const question = quizOrder[quizIndex];
+    const options = Array.isArray(question.options) ? question.options : [];
+    const correctAnswer = Number(question.answer);
+
+    if (!options.length) {
+      card.innerHTML = `
+        <p class="empty-state">
+          This quiz question has no answer options. Check its data in the content files.
+        </p>
+      `;
+      return;
+    }
+
+    card.innerHTML = `
+      <span class="quiz-meta">
+        QUESTION ${quizIndex + 1} OF ${quizOrder.length}
+      </span>
+
+      <h3>${escapeHTML(question.q || question.question || 'Quiz question')}</h3>
 
       <div class="answer-list">
-        ${q.options.map((option, i) => {
-          let cls = 'answer-option';
+        ${options.map((option, index) => {
+          let className = 'answer-option';
 
-          if (selectedQuizAnswer !== null && i === q.answer) {
-            cls += ' correct';
-          } else if (selectedQuizAnswer === i && i !== q.answer) {
-            cls += ' incorrect';
+          if (selectedQuizAnswer !== null && index === correctAnswer) {
+            className += ' correct';
+          } else if (
+            selectedQuizAnswer === index &&
+            index !== correctAnswer
+          ) {
+            className += ' incorrect';
           }
 
-          return `<button class="${cls}" data-answer="${i}" ${selectedQuizAnswer !== null ? 'disabled' : ''}>
-            <span class="option-letter">${String.fromCharCode(65 + i)}</span>
-            <span>${escapeHTML(option)}</span>
-          </button>`;
+          return `
+            <button
+              type="button"
+              class="${className}"
+              data-answer="${index}"
+              ${selectedQuizAnswer !== null ? 'disabled' : ''}
+            >
+              <span class="option-letter">${String.fromCharCode(65 + index)}</span>
+              <span>${escapeHTML(option)}</span>
+            </button>
+          `;
         }).join('')}
       </div>
 
       ${selectedQuizAnswer !== null ? `
         <div class="quiz-feedback">
-          <strong>${selectedQuizAnswer === q.answer ? 'Correct!' : 'Not quite.'}</strong><br>
-          ${escapeHTML(q.explanation)}
+          <strong>${selectedQuizAnswer === correctAnswer ? 'Correct!' : 'Not quite.'}</strong>
+          <p>${escapeHTML(question.explanation || 'Review the topic and try another question.')}</p>
         </div>
       ` : ''}
 
       <div class="quiz-controls">
-        <span class="muted">${selectedQuizAnswer === null ? 'Choose the best answer.' : 'Take a moment to read the explanation.'}</span>
-        <button id="nextQuiz" ${selectedQuizAnswer === null ? 'disabled' : ''}>
+        <span class="muted">
+          ${selectedQuizAnswer === null
+            ? 'Choose the best answer.'
+            : 'Take a moment to read the explanation.'}
+        </span>
+
+        <button type="button" id="nextQuiz" ${selectedQuizAnswer === null ? 'disabled' : ''}>
           ${quizIndex === quizOrder.length - 1 ? 'Try a new set' : 'Next question →'}
         </button>
       </div>
     `;
 
-    $('#quizCard').querySelectorAll('[data-answer]').forEach(button =>
+    card.querySelectorAll('[data-answer]').forEach(button => {
       button.addEventListener('click', () => {
         selectedQuizAnswer = Number(button.dataset.answer);
         renderQuiz();
-      })
-    );
+      });
+    });
 
     $('#nextQuiz').addEventListener('click', () => {
+      if (selectedQuizAnswer === null) return;
+
       if (quizIndex === quizOrder.length - 1) {
-        quizOrder = shuffle([...window.BUSINESS_QUIZ]);
+        quizOrder = shuffle([...quizQuestions]);
         quizIndex = 0;
       } else {
         quizIndex++;
@@ -235,7 +452,7 @@
 
     const button = $('#askButton');
     button.disabled = true;
-    button.innerHTML = 'Thinking…';
+    button.textContent = 'Thinking…';
 
     try {
       const response = await fetch('/.netlify/functions/ai', {
@@ -244,17 +461,27 @@
         body: JSON.stringify({ question, topic })
       });
 
-      const data = await response.json();
+      let data = {};
+
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'The tutor could not answer right now.');
+      }
+
+      if (!data.answer) {
+        throw new Error('The tutor returned an empty answer. Please try again.');
       }
 
       $('#tutorAnswer').textContent = data.answer;
       $('#tutorAnswer').hidden = false;
     } catch (error) {
       $('#tutorError').textContent = error.message ||
-        'The tutor could not answer right now. If testing locally, deploy on Netlify or use Netlify Dev.';
+        'The tutor could not answer right now. Please try again after deployment.';
       $('#tutorError').hidden = false;
     } finally {
       button.disabled = false;
@@ -262,51 +489,72 @@
     }
   }
 
+  // Search.
   $('#searchInput').addEventListener('input', renderTopics);
-  $('#closeDialog').addEventListener('click', () => $('#topicDialog').close());
 
-  $('#topicDialog').addEventListener('click', event => {
-    if (event.target === $('#topicDialog')) $('#topicDialog').close();
+  // Topic dialog.
+  $('#closeDialog').addEventListener('click', () => {
+    $('#topicDialog').close();
   });
 
+  $('#topicDialog').addEventListener('click', event => {
+    if (event.target === $('#topicDialog')) {
+      $('#topicDialog').close();
+    }
+  });
+
+  // AI tutor character count.
   $('#tutorQuestion').addEventListener('input', () => {
-    $('#questionCount').textContent = `${$('#tutorQuestion').value.length}/2000`;
+    $('#questionCount').textContent =
+      `${$('#tutorQuestion').value.length}/2000`;
   });
 
   $('#askButton').addEventListener('click', askTutor);
 
-  document.querySelectorAll('[data-prompt]').forEach(button =>
+  // Suggested tutor prompts.
+  document.querySelectorAll('[data-prompt]').forEach(button => {
     button.addEventListener('click', () => {
-      $('#tutorQuestion').value = button.dataset.prompt;
-      $('#questionCount').textContent = `${button.dataset.prompt.length}/2000`;
+      const prompt = button.dataset.prompt;
+      $('#tutorQuestion').value = prompt;
+      $('#questionCount').textContent = `${prompt.length}/2000`;
       $('#tutorQuestion').focus();
-    })
-  );
+    });
+  });
 
+  // Reset progress.
   $('#resetProgress').addEventListener('click', () => {
     if (confirm('Reset all completed topics on this device?')) {
       completed.clear();
       saveProgress();
-      updateProgress();
       renderTopics();
+      updateProgress();
     }
   });
 
+  // Mobile navigation.
   $('#menuToggle').addEventListener('click', () => {
     const nav = $('#mainNav');
-    const open = nav.classList.toggle('open');
-    $('#menuToggle').setAttribute('aria-expanded', String(open));
+    const isOpen = nav.classList.toggle('open');
+
+    $('#menuToggle').setAttribute('aria-expanded', String(isOpen));
   });
 
-  $('#mainNav').querySelectorAll('a').forEach(a =>
-    a.addEventListener('click', () => {
+  $('#mainNav').querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
       $('#mainNav').classList.remove('open');
       $('#menuToggle').setAttribute('aria-expanded', 'false');
-    })
-  );
+    });
+  });
 
+  // Start the application.
   renderFilters();
   renderTopics();
   renderQuiz();
   updateProgress();
+
+  console.log('Business IGCSE app loaded.', {
+    topics: topics.length,
+    sections: sections.length,
+    quizQuestions: quizQuestions.length
+  });
 })();
