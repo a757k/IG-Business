@@ -1,0 +1,168 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102b46">
+  <meta name="description" content="Revision notes, practice questions and an AI tutor for Edexcel International GCSE Business (4BS1).">
+  <title>Business IGCSE — Learn, Practise, Improve</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="Business IGCSE home">
+      <span class="brand-mark">B</span>
+      <span>Business<span class="brand-light">IGCSE</span></span>
+    </a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <nav id="mainNav" aria-label="Main navigation">
+      <a href="#learn">Learn</a>
+      <a href="#practice">Practice</a>
+      <a href="#tutor">AI Tutor</a>
+      <a href="#progress">My progress</a>
+    </nav>
+  </header>
+
+  <main id="home">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">PEARSON EDEXCEL · INTERNATIONAL GCSE · 4BS1</p>
+        <h1>Understand business.<br><span>Own your exam.</span></h1>
+        <p class="hero-sub">Clear explanations, useful examples and exam-style practice — all in one place.</p>
+        <div class="hero-actions">
+          <a class="button button-light" href="#learn">Start learning <span>→</span></a>
+          <a class="hero-link" href="#practice">Try a question ↓</a>
+        </div>
+        <p class="hero-note">Built around the five content sections in the current 4BS1 specification.</p>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-top">
+          <span>YOUR REVISION SPACE</span>
+          <span class="live-dot"></span>
+        </div>
+        <div class="hero-stat">
+          <strong id="heroCompleted">0</strong>
+          <span>topics completed</span>
+        </div>
+        <div class="progress-track"><div id="heroProgressBar" class="progress-fill"></div></div>
+        <p id="heroProgressText">Start a topic to build your progress.</p>
+        <div class="mini-list">
+          <span>✓ Clear definitions</span>
+          <span>✓ Real-world examples</span>
+          <span>✓ Exam technique</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="learn">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">THE SYLLABUS</p>
+          <h2>Choose a topic.</h2>
+          <p class="muted">Search the learning library or browse by section.</p>
+        </div>
+        <label class="search-wrap">
+          <span>⌕</span>
+          <input id="searchInput" type="search" placeholder="Search topics or definitions…" aria-label="Search learning topics">
+        </label>
+      </div>
+      <div id="sectionFilters" class="filter-row" aria-label="Filter by syllabus section"></div>
+      <div id="topicGrid" class="topic-grid"></div>
+      <p id="noResults" class="empty-state" hidden>No topics match that search. Try a different keyword.</p>
+    </section>
+
+    <section class="section practice-section" id="practice">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">CHECK YOUR KNOWLEDGE</p>
+          <h2>Quick practice.</h2>
+          <p class="muted">Answer a question, then read the explanation.</p>
+        </div>
+        <span class="pill">Multiple choice</span>
+      </div>
+      <div id="quizCard" class="quiz-card"></div>
+    </section>
+
+    <section class="section tutor-section" id="tutor">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">YOUR STUDY PARTNER</p>
+          <h2>Ask the AI Tutor.</h2>
+          <p class="muted">Ask for a simple explanation, an example or exam-answer guidance.</p>
+        </div>
+        <span class="tutor-icon">✳</span>
+      </div>
+      <div class="tutor-layout">
+        <div class="tutor-panel">
+          <label for="tutorTopic">Syllabus section</label>
+          <select id="tutorTopic">
+            <option>All topics</option>
+            <option>Business activity and influences on business</option>
+            <option>People in business</option>
+            <option>Business finance</option>
+            <option>Marketing</option>
+            <option>Business operations</option>
+          </select>
+          <label for="tutorQuestion">What are you stuck on?</label>
+          <textarea id="tutorQuestion" rows="5" maxlength="2000" placeholder="For example: Explain why cash flow is important to a small business."></textarea>
+          <div class="textarea-footer">
+            <span id="questionCount">0/2000</span>
+            <span>Don't include personal information.</span>
+          </div>
+          <button class="button button-primary" id="askButton">Ask the tutor <span>→</span></button>
+          <p id="tutorError" class="error" role="alert" hidden></p>
+          <div id="tutorAnswer" class="tutor-answer" hidden aria-live="polite"></div>
+        </div>
+        <aside class="prompt-panel">
+          <p class="eyebrow">NEED AN IDEA?</p>
+          <h3>Try asking…</h3>
+          <button class="prompt" data-prompt="Explain this topic in simple terms and give a business example.">Explain a topic simply <span>↗</span></button>
+          <button class="prompt" data-prompt="Give me a 6-mark exam-style question on this topic, then explain how to structure a strong answer.">Practise an exam answer <span>↗</span></button>
+          <button class="prompt" data-prompt="Explain the difference between revenue, costs and profit, with a worked example.">Compare key terms <span>↗</span></button>
+          <p class="small-note">AI answers can make mistakes. Check important details against your course materials and mark schemes.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section progress-section" id="progress">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">YOUR REVISION</p>
+          <h2>Progress that stays on this device.</h2>
+          <p class="muted">Completed topics are saved in this browser on this device.</p>
+        </div>
+        <button id="resetProgress" class="button button-outline">Reset progress</button>
+      </div>
+      <div class="progress-summary">
+        <div class="progress-number">
+          <strong id="progressCount">0</strong>
+          <span>of <span id="totalTopics">0</span> topics completed</span>
+        </div>
+        <div class="wide-progress">
+          <div class="progress-track"><div id="mainProgressBar" class="progress-fill"></div></div>
+          <p id="mainProgressText">Your learning progress will appear here.</p>
+        </div>
+      </div>
+      <p class="small-note">Progress may be lost if browser/site data is cleared, you use private browsing, or switch browsers/devices.</p>
+    </section>
+  </main>
+
+  <footer>
+    <a class="brand footer-brand" href="#home">
+      <span class="brand-mark">B</span>
+      <span>Business<span class="brand-light">IGCSE</span></span>
+    </a>
+    <p>Independent revision resource for Edexcel International GCSE Business (4BS1). Not affiliated with Pearson.</p>
+    <a href="https://qualifications.pearson.com/en/qualifications/edexcel-international-gcses/business-2017.html" target="_blank" rel="noreferrer">Official Pearson specification ↗</a>
+  </footer>
+
+  <dialog id="topicDialog" class="topic-dialog">
+    <button class="dialog-close" id="closeDialog" aria-label="Close topic">×</button>
+    <div id="dialogContent"></div>
+  </dialog>
+
+  <script src="content.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
