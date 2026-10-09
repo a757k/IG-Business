@@ -4,11 +4,11 @@ exports.handler = async (event) => {
     return reply(405, { error: 'Method not allowed.' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
     return reply(503, {
-      error: 'AI Tutor is not configured. Add GEMINI_API_KEY in Netlify environment variables.'
+      error: 'AI Tutor is not configured. Add OPENAI_API_KEY in Netlify environment variables.'
     });
   }
 
@@ -41,69 +41,67 @@ exports.handler = async (event) => {
   }
 
   try {
-    const response = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': apiKey
-        },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{
-              text: [
-                'You are a careful, supportive tutor for Pearson Edexcel International GCSE Business (4BS1).',
-                'Explain concepts in clear, student-friendly English.',
-                'Use accurate business terminology, relevant examples, and step-by-step chains of reasoning.',
-                'For exam technique, explain how to apply knowledge to the case and develop consequences.',
-                'Do not claim your response is an official mark scheme.',
-                'If uncertain about a specification detail, say so and advise checking the current Pearson specification.',
-                'Keep answers focused on International GCSE Business and do not answer unrelated requests.'
-              ].join(' ')
-            }]
-          },
-          contents: [{
-            role: 'user',
-            parts: [{
-              text: `Selected syllabus topic: ${topic}\nStudent question: ${question}`
-            }]
-          }],
-          generationConfig: {
-            maxOutputTokens: 800
-          }
-        })
-      }
-    );
+    const response = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-5-mini',
+        instructions: [
+          'You are a careful, supportive tutor for Pearson Edexcel International GCSE Business (4BS1).',
+          'Explain concepts in clear, student-friendly English.',
+          'Use accurate business terminology, relevant examples, and step-by-step chains of reasoning.',
+          'For exam technique, explain how to apply knowledge to the case and develop consequences.',
+          'Do not claim your response is an official mark scheme.',
+          'If uncertain about a specification detail, say so and advise checking the current Pearson specification.',
+          'Keep answers focused on International GCSE Business and do not answer unrelated requests.'
+        ].join(' '),
+        input: `Selected syllabus topic: ${topic}\nStudent question: ${question}`,
+        max_output_tokens: 800
+      })
+    });
 
-    const data = await response.json();
+    let data = {};
+
+    try {
+      data = await response.json();
+    } catch {
+      data = {};
+    }
 
     if (!response.ok) {
       if (response.status === 429) {
         return reply(429, {
-          error: 'The AI Tutor has reached its current usage limit. Please try again later.'
+          error: 'The AI Tutor has reached a usage limit. Check your OpenAI API billing and limits, then try again later.'
         });
       }
 
-      if (response.status === 400 || response.status === 403) {
+      if (response.status === 401 || response.status === 403) {
         return reply(502, {
-          error: 'Gemini rejected the request. Check your API key, model access, and API settings in Google AI Studio.'
+          error: 'OpenAI rejected the API key or access. Check your OPENAI_API_KEY and API project permissions.'
         });
       }
 
       return reply(502, {
-        error: 'The Gemini service could not complete the request. Please try again later.'
+        error: 'The AI service could not complete the request. Please try again later.'
       });
     }
 
-    const answer = (data.candidates?.[0]?.content?.parts || [])
-      .map(part => part.text || '')
-      .join('\n')
-      .trim();
+    const answer = Array.isArray(data.output)
+      ? data.output
+          .filter(item => item.type === 'message')
+          .flatMap(item => Array.isArray(item.content) ? item.content : [])
+          .filter(item => item.type === 'output_text')
+          .map(item => item.text || '')
+          .join('\n')
+          .trim()
+      : '';
 
     if (!answer) {
       return reply(502, {
-        error: 'Gemini returned an empty answer. Please try again.'
+        error: 'The AI returned an empty answer. Please try again.'
       });
     }
 
@@ -111,7 +109,7 @@ exports.handler = async (event) => {
 
   } catch {
     return reply(502, {
-      error: 'Unable to reach Gemini. Please try again later.'
+      error: 'Unable to reach the AI service. Check your connection and try again.'
     });
   }
 };
