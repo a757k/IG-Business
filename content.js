@@ -1,497 +1,760 @@
 
-/*
-  Edexcel International GCSE Business (4BS1)
-  Learning library — Part 1: Business activity and influences on business.
-  Original revision explanations. Verify coverage against the current
-  official Pearson specification before describing the course as complete.
-*/
-
 window.BUSINESS_SECTIONS = [
-  {id:'all',label:'All sections'},
-  {id:'business',label:'1. Business activity'},
-  {id:'people',label:'2. People in business'},
-  {id:'finance',label:'3. Business finance'},
-  {id:'marketing',label:'4. Marketing'},
-  {id:'operations',label:'5. Business operations'}
+  { id: "all", name: "All Topics" },
+  { id: "business", name: "Business Activity and Influences" },
+  { id: "people", name: "People in Business" },
+  { id: "finance", name: "Business Finance" },
+  { id: "marketing", name: "Marketing" },
+  { id: "operations", name: "Business Operations" }
 ];
 
 window.BUSINESS_TOPICS = [
-  {
-    id:'business-activity',
-    section:'business',
-    sectionName:'Business activity and influences on business',
-    title:'Business activity and adding value',
-    summary:'Understand business activity, factors of production and how businesses add value.',
-    definition:'Business activity involves combining resources to produce goods or provide services that satisfy customer needs and wants.',
-    points:[
-      ['Needs and wants','Needs are essentials for living, such as food and shelter. Wants are things people would like to have but do not necessarily need. Businesses identify customer needs and wants to develop products.'],
-      ['Goods and services','Goods are physical products, such as clothes or furniture. Services are activities provided to customers, such as transport, haircuts or education.'],
-      ['Factors of production','Land includes natural resources; labour is human effort; capital includes manufactured resources such as machinery; enterprise is the ability to organise resources and take business risks.'],
-      ['Adding value','Added value is the difference between the selling price of a product and the cost of bought-in materials and components. A business can increase it through branding, quality, convenience, design or customer service.'],
-      ['Why businesses exist','Businesses supply products that customers want, create employment, generate income for owners and may contribute to economic growth.']
-    ],
-    example:'A bakery buys flour, eggs and sugar for QAR 20 and sells the finished cake for QAR 65. Its added value is QAR 45 before considering other costs such as wages, rent and electricity.',
-    examTip:'Do not confuse added value with profit. Added value subtracts bought-in materials and components from the selling price; profit subtracts total business costs from revenue.',
-    keywords:['business activity','needs','wants','goods','services','factors of production','land','labour','capital','enterprise','added value'],
-    question:'A business buys materials for QAR 12 and sells the finished product for QAR 40. Calculate the added value.',
-    answer:'Added value = selling price − cost of bought-in materials = QAR 40 − QAR 12 = QAR 28.'
-  },
-  {
-    id:'classification',
-    section:'business',
-    sectionName:'Business activity and influences on business',
-    title:'Classification of businesses',
-    summary:'Understand primary, secondary and tertiary sectors and how businesses are classified.',
-    definition:'Business classification groups businesses according to the type of economic activity they carry out.',
-    points:[
-      ['Primary sector','Businesses extract or obtain natural resources, such as farming, fishing, forestry and mining.'],
-      ['Secondary sector','Businesses manufacture goods or construct buildings, often using materials obtained from the primary sector.'],
-      ['Tertiary sector','Businesses provide services, including retail, transport, banking, tourism and hairdressing.'],
-      ['Interdependence','Businesses in different sectors often depend on each other. A farm supplies a food manufacturer, which supplies a supermarket.'],
-      ['Changes in sector importance','Economic development, technology, consumer demand and outsourcing can change the relative importance of sectors in a country.']
-    ],
-    example:'A farmer grows wheat in the primary sector, a mill turns it into flour in the secondary sector, and a shop sells flour to customers in the tertiary sector.',
-    examTip:'Identify the actual activity being carried out. A company may operate in more than one sector, so classify the activity described in the question.',
-    keywords:['classification','primary sector','secondary sector','tertiary sector','manufacturing','services','interdependence'],
-    question:'A company manufactures furniture from timber. Which sector is this activity in, and why?',
-    answer:'It is in the secondary sector because the company transforms a natural resource into a manufactured product.'
-  },
-  {
-    id:'enterprise',
-    section:'business',
-    sectionName:'Business activity and influences on business',
-    title:'Enterprise and entrepreneurship',
-    summary:'Explore entrepreneurs, business ideas, risk, reward and the skills needed to start a business.',
-    definition:'An entrepreneur identifies a business opportunity, organises resources and takes risks to establish or develop a business.',
-    points:[
-      ['Identifying opportunities','Entrepreneurs may spot an unmet customer need, a gap in the market or a way to improve an existing product.'],
-      ['Common skills','Useful skills include communication, decision-making, planning, organisation, problem-solving and managing money.'],
-      ['Risk and reward','An entrepreneur may earn profit, gain independence and achieve personal satisfaction, but may also lose invested money or face long working hours.'],
-      ['Innovation','Developing a new product, service or way of working can help a business stand out from competitors. Innovation does not guarantee success.'],
-      ['Why new businesses fail','Possible causes include weak demand, poor cash-flow management, strong competition, inadequate planning and insufficient finance.']
-    ],
-    example:'An entrepreneur notices that students near a school struggle to find affordable healthy lunches. They test demand and create a small lunch-delivery service, but must assess costs, competitors and likely sales.',
-    examTip:'When discussing an entrepreneur’s success, link the skill or decision to a business outcome. For example, research may reduce uncertainty by identifying what customers are willing to buy.',
-    keywords:['enterprise','entrepreneur','risk','reward','innovation','business idea','opportunity','business failure'],
-    question:'Explain one risk an entrepreneur faces when starting a business.',
-    answer:'The entrepreneur may invest personal savings but attract fewer customers than expected. Revenue may then be insufficient to cover costs, causing financial losses and possibly forcing the business to close.'
-  },
-  {
-    id:'business-plans',
-    section:'business',
-    sectionName:'Business activity and influences on business',
-    title:'Business plans',
-    summary:'Learn the purpose, contents, benefits and limitations of a business plan.',
-    definition:'A business plan is a document setting out a business idea, its objectives and how the business intends to operate and achieve those objectives.',
-    points:[
-      ['Business idea and objectives','The plan explains what the business will sell, its intended customers and what it wants to achieve.'],
-      ['Market information','Research about customer demand, competitors and the target market helps assess whether the idea is viable.'],
-      ['Marketing and operations','The plan may explain pricing, promotion, location, suppliers, staffing and how products will be delivered.'],
-      ['Financial forecasts','Expected sales, costs, cash flow and finance requirements help estimate whether the business can meet its payments and may make a profit.'],
-      ['Benefits','Planning can identify problems early, clarify priorities and help persuade lenders or investors that the idea has been considered carefully.'],
-      ['Limitations','Forecasts can be inaccurate, market conditions can change, and a detailed plan cannot guarantee success.']
-    ],
-    example:'Before opening a café, an owner estimates daily sales, calculates rent and wage costs, researches nearby competitors and forecasts whether enough cash will be available during the first few months.',
-    examTip:'A business plan is only as reliable as its assumptions and information. Explain how a particular part of the plan helps the business make a better decision.',
-    keywords:['business plan','objectives','market research','forecast','cash flow','sales forecast','financial planning'],
-    question:'Explain one reason why a business plan may help a new business obtain finance.',
-    answer:'A business plan can show a lender how the business expects to generate sales and repay borrowing. This may increase the lender’s confidence, although finance is not guaranteed.'
-  },
-  {
-    id:'objectives',
-    section:'business',
-    sectionName:'Business activity and influences on business',
-    title:'Business aims and objectives',
-    summary:'Understand financial and non-financial objectives and why they change.',
-    definition:'Business objectives are the specific goals a business aims to achieve.',
-    points:[
-      ['Survival','A new or struggling business may prioritise remaining in operation and generating enough cash to pay its bills.'],
-      ['Profit','Profit is the amount remaining when total costs are deducted from total revenue. Owners may seek to increase profit to earn a return on their investment.'],
-      ['Sales and market share','A business may aim to increase sales revenue or gain a larger proportion of total sales in its market. Increasing sales does not automatically increase profit.'],
-      ['Financial security','A business may aim to manage borrowing, maintain sufficient cash and reduce financial uncertainty.'],
-      ['Non-financial objectives','These may include independence, personal satisfaction, social or environmental aims, and providing a particular service.'],
-      ['Why objectives change','Business size, market conditions, competition, technology, financial performance and owners’ priorities can change the objectives a business pursues.']
-    ],
-    example:'A new local bakery may initially focus on survival and building a customer base. Once established, it may aim to increase profit or open another branch.',
-    examTip:'Apply the point to the business in the question. Explain the consequence: objective → decision or action → likely effect on the business.',
-    keywords:['objectives','aims','profit','survival','sales','market share','financial security','non-financial'],
-    question:'Why might a new business prioritise survival over profit?',
-    answer:'A new business may have uncertain sales and needs enough cash to pay its costs while building a customer base. Prioritising survival may help it establish itself before pursuing higher profit.'
-  },
-  {
-    id:'ownership',
-    section:'business',
-    sectionName:'Business activity and influences on business',
-    title:'Types of business ownership',
-    summary:'Compare sole traders, partnerships, limited companies and public corporations.',
-    definition:'Ownership describes who legally owns and controls a business or organisation.',
-    points:[
-      ['Sole trader','Owned by one person. The owner usually makes decisions independently and keeps the profit after costs and taxes, but normally has unlimited liability for business debts.'],
-      ['Partnership','Owned by two or more partners who share responsibilities and profits according to their agreement. In a traditional partnership, partners may have unlimited liability.'],
-      ['Private limited company','A company that is legally separate from its owners. Shares are generally held privately and cannot be freely offered to the public. Shareholders generally have limited liability.'],
-      ['Public limited company','A company that can offer shares to the public, subject to legal requirements. It may be able to raise substantial share capital, but faces greater regulation and reporting requirements.'],
-      ['Limited liability','Shareholders generally risk the amount invested in their shares rather than being personally responsible for all company debts, subject to legal exceptions.'],
-      ['Choosing ownership','Owners may consider control, finance, liability, continuity, administration costs and plans for growth.']
-    ],
-    example:'A self-employed plumber may choose sole-trader status for simplicity, while a growing business seeking investment from shareholders may incorporate as a limited company.',
-    examTip:'Do not just list a feature. Link it to the owner’s needs, such as control, risk, finance or future growth. Avoid saying a limited company can never fail.',
-    keywords:['sole trader','partnership','private limited company','public limited company','limited liability','unlimited liability','shareholder'],
-    question:'Give one advantage to an owner of setting up a limited company.',
-    answer:'Shareholders generally have limited liability, so their personal assets are protected from company debts beyond the amount invested, subject to legal exceptions.'
-  },
-  {
-    id:'stakeholders',
-    section:'business',
-    sectionName:'Business activity and influences on business',
-    title:'Stakeholders and business influences',
-    summary:'Identify stakeholder groups, their objectives and possible conflicts of interest.',
-    definition:'A stakeholder is a person or group with an interest in, or affected by, the activities of a business.',
-    points:[
-      ['Owners and shareholders','May want profit, growth, dividends, business survival or an increase in the value of their investment.'],
-      ['Employees and managers','May want fair pay, job security, safe conditions, promotion opportunities and a manageable workload.'],
-      ['Customers','Usually want products that offer suitable quality, price, reliability and customer service.'],
-      ['Suppliers and lenders','Suppliers may want prompt payment and continuing orders. Lenders want the business to repay borrowing and interest according to the agreement.'],
-      ['Government and local community','Government may be concerned with tax revenue, employment and compliance with laws. Local communities may value jobs but be concerned about noise, traffic or pollution.'],
-      ['Conflicting interests','Employees may want higher wages while owners want to control costs. Customers may want lower prices while owners want higher profit margins.']
-    ],
-    example:'If a factory increases wages, employees may become more motivated, but labour costs may rise and reduce profit unless productivity or sales also increase.',
-    examTip:'Identify the stakeholder, explain what they want, and develop how meeting that interest affects the business or another stakeholder.',
-    keywords:['stakeholder','owners','shareholders','employees','customers','suppliers','lenders','government','community','conflict'],
-    question:'Explain one possible conflict between employees and owners.',
-    answer:'Employees may want higher wages to improve their living standards. Higher wages increase labour costs, which may reduce profit unless productivity or sales also rise.'
-  },
-  {
-    id:'business-growth',
-    section:'business',
-    sectionName:'Business activity and influences on business',
-    title:'Business growth',
-    summary:'Understand why businesses grow and compare internal and external growth.',
-    definition:'Business growth occurs when a business increases its size or scale of operations, such as by increasing sales, output, employees or the number of locations.',
-    points:[
-      ['Reasons for growth','A business may seek higher profit, a larger market share, economies of scale, greater market power or access to new customers.'],
-      ['Internal growth','The business expands its own operations, for example by opening another branch, increasing capacity or developing new products.'],
-      ['External growth','The business grows by combining with or taking over another business, such as through a merger or acquisition.'],
-      ['Potential benefits','Growth can increase sales, spread fixed costs over more output, strengthen bargaining power and reduce dependence on one product or market.'],
-      ['Potential problems','Expansion may require finance, create communication difficulties, increase management workloads or lead to diseconomies of scale.'],
-      ['Choosing a growth method','A business should consider its finances, management skills, objectives, market conditions and the risks of expanding too quickly.']
-    ],
-    example:'A successful café may grow internally by opening a second branch. Alternatively, it could acquire another café, which may provide an existing customer base but bring integration challenges.',
-    examTip:'Growth is not automatically beneficial. Explain how the chosen method suits the business and consider its costs, risks and ability to manage expansion.',
-    keywords:['growth','internal growth','external growth','merger','acquisition','takeover','economies of scale','diseconomies of scale'],
-    question:'Explain one possible disadvantage of a business growing too quickly.',
-    answer:'Rapid growth may make it harder for managers to supervise employees and maintain consistent quality. Customer complaints could increase, damaging the business’s reputation and reducing repeat sales.'
-  },
-  {
-    id:'external-influences',
-    section:'business',
-    sectionName:'Business activity and influences on business',
-    title:'External influences on businesses',
-    summary:'Understand how economic, legal, technological, competitive and social changes affect decisions.',
-    definition:'External influences are factors outside a business that can affect its decisions, costs, sales and performance.',
-    points:[
-      ['Economic conditions','Changes in inflation, interest rates, unemployment and economic growth can affect business costs, borrowing and customer spending.'],
-      ['Competition','Competitors may force a business to improve quality, change prices, invest in promotion or develop new products.'],
-      ['Technology','New technology can improve productivity, communication and customer convenience, but may require investment and employee training.'],
-      ['Laws and regulation','Businesses must comply with relevant rules, such as employment, consumer protection, health and safety and environmental requirements.'],
-      ['Social and environmental expectations','Changes in customer lifestyles, preferences and environmental awareness may affect demand and business practices.'],
-      ['Responding to change','Businesses can monitor markets, research customer needs, plan for risks and adapt their products or operations.']
-    ],
-    example:'If inflation increases ingredient and electricity costs, a bakery may consider reducing waste, negotiating with suppliers or adjusting prices. Raising prices too much could reduce demand.',
-    examTip:'Do not merely name an external factor. Explain the chain of impact on costs, demand, cash flow, profit or a specific business objective.',
-    keywords:['external influences','inflation','interest rates','competition','technology','legislation','environment','economic growth'],
-    question:'Explain how an increase in interest rates could affect a business with a variable-rate loan.',
-    answer:'Higher interest rates may increase the business’s loan repayments. This leaves less cash available for other spending or expansion and may reduce profit if other factors remain unchanged.'
-  },
+  // SECTION 1: BUSINESS ACTIVITY AND INFLUENCES
 
   {
-    id:'recruitment',
-    section:'people',
-    sectionName:'People in business',
-    title:'Recruitment and selection',
-    summary:'Learn why businesses recruit and the main steps in selecting staff.',
-    definition:'Recruitment is the process of attracting suitable applicants for a job vacancy; selection is choosing the most suitable applicant.',
-    points:[
-      ['Job analysis and description','Identify duties, responsibilities and working conditions.'],
-      ['Person specification','Sets out the qualifications, skills and personal qualities required.'],
-      ['Internal recruitment','Filling a vacancy with an existing employee; may be quicker and motivate staff.'],
-      ['External recruitment','Hiring from outside; can bring new skills but may cost more and take longer.']
+    id: "business-activity",
+    section: "business",
+    sectionName: "Business Activity and Influences",
+    title: "Business Activity and Added Value",
+    summary: "How businesses combine resources to provide goods and services and create value.",
+    definition: "Business activity involves combining resources to produce goods or provide services that satisfy customer needs and wants.",
+    points: [
+      ["Needs and wants", "Needs are essential for survival, such as food and shelter. Wants are non-essential goods and services that people desire."],
+      ["Goods", "Physical products that customers can touch, such as phones, clothes and furniture."],
+      ["Services", "Intangible activities provided to customers, such as banking, education and haircuts."],
+      ["Factors of production", "Land means natural resources; labour means human effort; capital means manufactured resources used to produce goods and services; enterprise means organising resources and taking business risks."],
+      ["Added value", "The difference between the selling price of a product and the cost of bought-in materials and components."],
+      ["Increasing added value", "A business can improve quality, build a brand, offer excellent service, improve design or make a product more convenient."],
+      ["Specialisation", "Workers or businesses concentrate on particular tasks or products. This can improve efficiency and expertise, but may create dependence on others."]
     ],
-    example:'A shop opening a second branch might promote an experienced supervisor internally, while recruiting externally for specialist skills it does not have.',
-    examTip:'When evaluating internal versus external recruitment, consider cost, speed, skills, motivation and the specific vacancy.',
-    keywords:['recruitment','selection','job description','person specification','internal','external'],
-    question:'State one advantage of internal recruitment.',
-    answer:'It can be quicker and cheaper because the business already knows the employee’s performance and may need less induction training.'
+    example: "A bakery buys ingredients for QAR 4 per loaf and sells each loaf for QAR 12. Its added value is QAR 8 per loaf, before other operating costs.",
+    examTip: "Added value is not the same as profit. Profit also takes account of other costs, such as wages, rent and electricity.",
+    keywords: ["needs", "wants", "goods", "services", "factors of production", "added value", "specialisation"],
+    question: "A product sells for QAR 25 and its bought-in materials cost QAR 9. Calculate its added value.",
+    answer: "Added value = selling price − cost of bought-in materials = QAR 25 − QAR 9 = QAR 16."
   },
   {
-    id:'motivation',
-    section:'people',
-    sectionName:'People in business',
-    title:'Motivation and training',
-    summary:'Explore how businesses motivate employees and improve their skills.',
-    definition:'Motivation is the willingness of an employee to make an effort to achieve work goals.',
-    points:[
-      ['Financial methods','Wages, salaries, commission, bonuses and profit sharing.'],
-      ['Non-financial methods','Praise, responsibility, promotion opportunities, job rotation and improved working conditions.'],
-      ['Training','Induction introduces a new employee; on-the-job training happens while working; off-the-job training takes place away from the normal workplace.'],
-      ['Possible effects','Motivation and training can improve productivity, quality and staff retention, but involve costs.']
+    id: "classification",
+    section: "business",
+    sectionName: "Business Activity and Influences",
+    title: "Business Classification and Sectors",
+    summary: "The primary, secondary and tertiary sectors and how businesses are classified.",
+    definition: "Business classification involves grouping businesses according to their activity, ownership, size or sector.",
+    points: [
+      ["Primary sector", "Extracts or obtains natural resources, including farming, fishing, forestry and mining."],
+      ["Secondary sector", "Processes raw materials and manufactures products, such as car production and furniture manufacturing."],
+      ["Tertiary sector", "Provides services, such as retail, transport, healthcare, tourism and banking."],
+      ["Interdependence", "Businesses in different sectors rely on one another. A furniture factory may depend on forestry businesses for timber and retailers to sell its products."],
+      ["Private sector", "Businesses owned by individuals or private organisations. Many aim to make a profit."],
+      ["Public sector", "Organisations owned or controlled by the government, often providing services to the public."],
+      ["Changes in sectors", "Economic development, technology, consumer demand and outsourcing can change the relative importance of each sector."]
     ],
-    example:'Sales commission may encourage a salesperson to sell more, but poorly designed targets could encourage unsuitable sales or harm customer service.',
-    examTip:'Explain the mechanism: incentive or training → employee behaviour or skill → productivity, quality, costs or customer satisfaction.',
-    keywords:['motivation','commission','bonus','training','productivity'],
-    question:'Explain how training could benefit a business.',
-    answer:'Training can improve employees’ skills, allowing them to work more efficiently and make fewer mistakes. This may reduce waste and costs, improving profitability.'
+    example: "A farm grows cotton in the primary sector, a factory turns it into clothing in the secondary sector, and a shop sells it in the tertiary sector.",
+    examTip: "Classify a business by its main activity. Explain how sector changes affect employment, output or business opportunities.",
+    keywords: ["primary", "secondary", "tertiary", "private sector", "public sector", "interdependence"],
+    question: "A company manufactures refrigerators. Which sector does it operate in?",
+    answer: "The secondary sector, because it transforms materials and components into manufactured products."
   },
   {
-    id:'leadership',
-    section:'people',
-    sectionName:'People in business',
-    title:'Organisation and leadership',
-    summary:'Understand organisational structure, communication and leadership styles.',
-    definition:'Organisational structure shows how roles, responsibilities and authority are arranged in a business.',
-    points:[
-      ['Hierarchy','The levels of authority in an organisation.'],
-      ['Span of control','The number of employees directly managed by one manager.'],
-      ['Delegation','Passing authority to a subordinate to carry out tasks while the manager retains overall accountability.'],
-      ['Leadership styles','Autocratic leaders make decisions centrally; democratic leaders involve employees; laissez-faire leaders give employees substantial independence.']
+    id: "enterprise",
+    section: "business",
+    sectionName: "Business Activity and Influences",
+    title: "Enterprise and Entrepreneurship",
+    summary: "Entrepreneurs, business ideas, risk, reward and the skills needed to start a business.",
+    definition: "Enterprise is the ability to identify business opportunities, organise resources and take risks to establish or develop a business.",
+    points: [
+      ["Entrepreneur", "A person who organises resources and takes risks to start or run a business."],
+      ["Identifying opportunities", "Entrepreneurs may identify unmet customer needs, gaps in a market or ways to improve existing products."],
+      ["Risk", "A business may lose money if sales are lower than expected or costs are higher than planned."],
+      ["Reward", "Potential rewards include profit, independence, personal satisfaction and business growth."],
+      ["Entrepreneurial skills", "Useful skills include communication, decision-making, organisation, resilience, creativity and financial management."],
+      ["Market research", "Research helps entrepreneurs understand customer needs, competition and likely demand before committing resources."],
+      ["Business planning", "A business plan can set out objectives, target customers, marketing, operations, costs, finance and sales forecasts."]
     ],
-    example:'A fast-moving emergency may require quick central decisions, while a creative team may benefit from employee input.',
-    examTip:'Avoid claiming one leadership style is always best. Match it to the workforce, task, urgency and business culture.',
-    keywords:['hierarchy','span of control','delegation','autocratic','democratic','laissez-faire'],
-    question:'What is one possible benefit of delegation?',
-    answer:'Delegation can free managers to focus on strategic tasks and can develop employees’ skills and confidence.'
+    example: "An entrepreneur notices demand for affordable school lunches and opens a lunch-delivery business. It may succeed if enough students buy the meals, but could lose money if demand is weak.",
+    examTip: "When explaining a risk, link it to a possible consequence. For example, inaccurate demand forecasts may lead to unsold stock and lower profit.",
+    keywords: ["enterprise", "entrepreneur", "risk", "reward", "opportunity", "business idea"],
+    question: "Explain one reason why an entrepreneur might carry out market research before starting a business.",
+    answer: "Market research helps the entrepreneur estimate demand. This can reduce the risk of investing money in a product that too few customers want."
   },
   {
-    id:'cashflow',
-    section:'finance',
-    sectionName:'Business finance',
-    title:'Cash flow and cash-flow forecasts',
-    summary:'Distinguish cash from profit and understand why cash-flow planning matters.',
-    definition:'Cash flow is the movement of money into and out of a business over a period of time.',
-    points:[
-      ['Inflows','Cash received, such as cash sales, payments from credit customers or loans.'],
-      ['Outflows','Cash paid, such as wages, rent, suppliers and loan repayments.'],
-      ['Net cash flow','Cash inflows minus cash outflows for a period.'],
-      ['Cash-flow forecast','An estimate of future cash inflows and outflows used to anticipate shortages or surpluses.']
+    id: "business-plans",
+    section: "business",
+    sectionName: "Business Activity and Influences",
+    title: "Business Plans",
+    summary: "The purpose, contents, advantages and limitations of business plans.",
+    definition: "A business plan is a document describing a proposed or existing business, its objectives and how it intends to achieve them.",
+    points: [
+      ["Objectives", "Explains what the business wants to achieve, such as sales targets or growth."],
+      ["Market research", "Describes target customers, demand and competitors."],
+      ["Marketing plan", "Sets out product, price, promotion and place decisions."],
+      ["Financial forecasts", "May include expected sales, costs, cash flow and profit."],
+      ["Operational plans", "Describe resources, staffing, suppliers, production and location."],
+      ["Benefits", "Helps owners plan, identify potential problems and persuade lenders or investors that the business is viable."],
+      ["Limitations", "Forecasts may be inaccurate, markets can change and preparing a plan takes time."]
     ],
-    example:'A business may make sales on credit and record revenue, but if customers pay late it may not have cash available to pay wages.',
-    examTip:'Profit is not the same as cash. In a calculation, show the formula and use the figures for the correct period.',
-    keywords:['cash flow','cash inflow','cash outflow','net cash flow','forecast','liquidity'],
-    question:'Why can a profitable business still experience cash-flow problems?',
-    answer:'It may have made sales on credit but not received the cash yet. Bills and wages may be due before customers pay, leaving insufficient cash to meet short-term payments.'
+    example: "A bank may examine a business plan before deciding whether to lend money to a new restaurant.",
+    examTip: "A business plan does not guarantee success. Its usefulness depends on the quality of information and whether the owner responds to changing circumstances.",
+    keywords: ["business plan", "objectives", "forecast", "lender", "investor"],
+    question: "Explain one benefit of a business plan to a new business owner.",
+    answer: "It helps the owner estimate future costs and cash needs, making it easier to identify a potential shortage of finance before opening."
   },
   {
-    id:'costsrevenueprofit',
-    section:'finance',
-    sectionName:'Business finance',
-    title:'Revenue, costs and profit',
-    summary:'Use core financial terms and calculate profit from revenue and costs.',
-    definition:'Revenue is income from selling goods or services. Profit is what remains when total costs are subtracted from revenue.',
-    points:[
-      ['Revenue','Selling price per unit × quantity sold.'],
-      ['Fixed costs','Costs that do not change directly with output in the short term, such as rent.'],
-      ['Variable costs','Costs that change with output, such as ingredients used to make products.'],
-      ['Total costs','Fixed costs + variable costs.'],
-      ['Profit','Total revenue − total costs.']
+    id: "objectives",
+    section: "business",
+    sectionName: "Business Activity and Influences",
+    title: "Business Objectives",
+    summary: "Business aims, SMART objectives and how objectives can change over time.",
+    definition: "Business objectives are specific targets that a business aims to achieve.",
+    points: [
+      ["Survival", "A common objective for a new or struggling business is to generate enough revenue to continue operating."],
+      ["Profit maximisation", "Aims to make the highest possible profit. Profit is revenue minus total costs."],
+      ["Growth", "A business may aim to increase sales, market share, employees, locations or output."],
+      ["Market share", "The proportion of total market sales achieved by a business."],
+      ["Customer satisfaction", "Satisfied customers may return, recommend the business and help it build a strong reputation."],
+      ["Social and environmental objectives", "Some businesses aim to reduce environmental harm, support communities or treat workers fairly."],
+      ["SMART objectives", "Specific, measurable, achievable, relevant and time-bound objectives are easier to evaluate."],
+      ["Changing objectives", "Objectives may change with business size, competition, economic conditions, available finance or ownership priorities."]
     ],
-    example:'If a business earns QAR 8,000 in revenue and has total costs of QAR 5,500, its profit is QAR 2,500.',
-    examTip:'Check whether a question asks for revenue, gross profit, profit for the period or net cash flow; these are not interchangeable.',
-    keywords:['revenue','fixed cost','variable cost','total cost','profit','calculation'],
-    question:'A business earns QAR 12,000 in revenue and has total costs of QAR 9,250. Calculate its profit.',
-    answer:'Profit = total revenue − total costs = QAR 12,000 − QAR 9,250 = QAR 2,750.'
+    example: "A new café may prioritise survival during its first year, then aim to increase market share and open a second branch.",
+    examTip: "Explain why an objective is suitable in the circumstances given. A new business may prioritise survival, whereas an established business may focus on growth.",
+    keywords: ["objectives", "survival", "profit", "growth", "market share", "SMART"],
+    question: "Explain why a new business might prioritise survival rather than profit maximisation.",
+    answer: "A new business may have low sales and high initial costs. Prioritising survival helps it generate enough cash and revenue to remain open while building a customer base."
   },
   {
-    id:'break-even',
-    section:'finance',
-    sectionName:'Business finance',
-    title:'Break-even analysis',
-    summary:'Understand break-even output, margin of safety and the limits of break-even analysis.',
-    definition:'Break-even output is the level of output at which total revenue equals total costs, so the business makes neither a profit nor a loss.',
-    points:[
-      ['Contribution per unit','Selling price per unit − variable cost per unit.'],
-      ['Break-even output','Fixed costs ÷ contribution per unit.'],
-      ['Margin of safety','Actual or planned output − break-even output.'],
-      ['Uses and limitations','It supports planning, but depends on assumptions and estimates that may change in reality.']
+    id: "ownership",
+    section: "business",
+    sectionName: "Business Activity and Influences",
+    title: "Business Ownership",
+    summary: "Sole traders, partnerships, private and public limited companies, franchises and social enterprises.",
+    definition: "Business ownership describes who legally owns a business and how it is organised.",
+    points: [
+      ["Sole trader", "Owned by one person. It is often easy to establish and the owner keeps profits, but may have unlimited liability and limited access to finance."],
+      ["Partnership", "Owned by two or more partners. They may share skills, capital and workload, but disagreements can arise and ordinary partnerships commonly involve unlimited liability."],
+      ["Private limited company (Ltd)", "A company whose shares are privately held and are not offered to the general public on a stock exchange. Shareholders generally have limited liability."],
+      ["Public limited company (plc)", "A company that can offer shares to the public, subject to legal requirements. It can potentially raise substantial finance but faces greater regulation and disclosure requirements."],
+      ["Limited liability", "Owners generally risk the amount they invested in the company rather than being personally responsible for all company debts, subject to legal exceptions."],
+      ["Franchise", "A franchisee pays to use another business's brand and operating system. It gains an established name but pays fees and must follow the franchisor's rules."],
+      ["Social enterprise", "A business that trades to achieve social or environmental goals, usually reinvesting some or all of its surplus in its mission."],
+      ["Choosing ownership", "Factors include liability, control, finance, continuity, profits, legal requirements and the owners' objectives."]
     ],
-    example:'If fixed costs are QAR 2,000 and contribution is QAR 5 per unit, break-even output is 400 units.',
-    examTip:'For break-even output, calculate contribution first. Use consistent units and explain what the result means for the business.',
-    keywords:['break-even','contribution','margin of safety','fixed costs'],
-    question:'Fixed costs are QAR 3,000. Selling price is QAR 20 and variable cost is QAR 8 per unit. Calculate break-even output.',
-    answer:'Contribution per unit = QAR 20 − QAR 8 = QAR 12. Break-even output = QAR 3,000 ÷ QAR 12 = 250 units.'
+    example: "A sole trader may retain control over every decision, while a limited company can provide its shareholders with limited liability.",
+    examTip: "Do not simply list advantages. Apply them to the owner in the question, considering their need for control, finance and willingness to accept risk.",
+    keywords: ["sole trader", "partnership", "Ltd", "plc", "limited liability", "franchise", "social enterprise"],
+    question: "Explain one advantage of a private limited company compared with a sole trader.",
+    answer: "Shareholders generally have limited liability. This reduces the risk of losing personal assets if the company cannot pay its debts, although legal exceptions can apply."
   },
   {
-    id:'market-research',
-    section:'marketing',
-    sectionName:'Marketing',
-    title:'Market research',
-    summary:'Compare primary and secondary research and quantitative and qualitative data.',
-    definition:'Market research is collecting and analysing information about customers, competitors and a market to support business decisions.',
-    points:[
-      ['Primary research','New information collected directly, such as surveys, interviews or focus groups.'],
-      ['Secondary research','Existing information, such as government statistics, reports or published market data.'],
-      ['Quantitative data','Numerical information that can be measured or counted.'],
-      ['Qualitative data','Opinions, reasons and attitudes that help explain why people behave as they do.']
+    id: "stakeholders",
+    section: "business",
+    sectionName: "Business Activity and Influences",
+    title: "Stakeholders",
+    summary: "Stakeholder groups, their interests and potential conflicts.",
+    definition: "Stakeholders are individuals or groups affected by, or able to affect, the decisions and activities of a business.",
+    points: [
+      ["Owners and shareholders", "Often want profits, growth and a return on their investment."],
+      ["Employees", "May want fair wages, job security, safe conditions and opportunities for promotion."],
+      ["Customers", "Usually want good-quality products, fair prices, reliable service and value for money."],
+      ["Suppliers", "Want regular orders, reliable payments and a stable business relationship."],
+      ["Lenders", "Want the business to repay borrowing and interest when due."],
+      ["Government", "May want businesses to obey laws, pay taxes and create employment."],
+      ["Local community", "May benefit from jobs but be concerned about noise, traffic or pollution."],
+      ["Stakeholder conflict", "Increasing wages may benefit employees but raise costs for owners. Lower prices may benefit customers but reduce profit margins."]
     ],
-    example:'Before launching a new drink, a business might survey potential customers about preferred flavours and examine existing market reports to estimate demand.',
-    examTip:'Discuss whether the research is relevant, reliable, up to date and representative of the target market.',
-    keywords:['market research','primary','secondary','quantitative','qualitative','survey'],
-    question:'Give one advantage of primary market research.',
-    answer:'It can be designed around the business’s exact research question and target customers, making the information highly relevant.'
+    example: "A factory may want to increase production to raise profits, while nearby residents may oppose the resulting noise and traffic.",
+    examTip: "For a strong answer, explain the interests of both sides of a conflict and link the conflict to a specific business decision.",
+    keywords: ["stakeholder", "owners", "employees", "customers", "suppliers", "government", "conflict"],
+    question: "Explain one possible conflict between employees and owners.",
+    answer: "Employees may want higher wages, but owners may want to keep wages low to reduce costs and increase profit. A wage increase could improve motivation while reducing profit margins."
   },
   {
-    id:'marketing-mix',
-    section:'marketing',
-    sectionName:'Marketing',
-    title:'The marketing mix: 4Ps',
-    summary:'Apply product, price, promotion and place to a target market.',
-    definition:'The marketing mix is the combination of product, price, promotion and place decisions used to market a product.',
-    points:[
-      ['Product','Features, quality, design, branding and packaging.'],
-      ['Price','The amount customers pay; decisions may consider costs, competitors and customer perceptions.'],
-      ['Promotion','Methods used to inform and persuade customers, including advertising and sales promotions.'],
-      ['Place','How and where a product is distributed and made available to customers.']
+    id: "business-growth",
+    section: "business",
+    sectionName: "Business Activity and Influences",
+    title: "Business Growth",
+    summary: "Internal and external growth, economies of scale and problems caused by expansion.",
+    definition: "Business growth occurs when a business increases its size, output, sales, workforce or market presence.",
+    points: [
+      ["Internal growth", "Expansion using the business's own activities, such as opening new branches or increasing production."],
+      ["External growth", "Expansion through joining with or acquiring another business."],
+      ["Merger", "Two businesses combine to form one organisation, subject to the relevant legal arrangements."],
+      ["Takeover", "One business gains control of another."],
+      ["Economies of scale", "Average costs may fall as output rises, for example through bulk buying, specialisation or spreading fixed costs."],
+      ["Diseconomies of scale", "Average costs may rise if a business becomes difficult to manage, communication worsens or coordination becomes inefficient."],
+      ["Problems of growth", "Expansion may require finance, create cash-flow pressure, reduce personal control or make quality harder to maintain."]
     ],
-    example:'A premium product may use high-quality packaging, a higher price, targeted promotion and selected retailers to support its positioning.',
-    examTip:'Show how the 4Ps fit together and suit the target customer rather than discussing each P in isolation.',
-    keywords:['marketing mix','product','price','promotion','place','4Ps'],
-    question:'Why should a business consider its target market when setting price?',
-    answer:'The target market affects customers’ willingness and ability to pay. A price that matches the target customers’ expectations can support sales and the product’s intended image.'
+    example: "A large supermarket chain may negotiate lower prices from suppliers because it purchases goods in large quantities.",
+    examTip: "Growth is not always beneficial. Evaluate whether expected cost savings and extra sales outweigh the finance required and the risks of managing a larger organisation.",
+    keywords: ["growth", "internal growth", "external growth", "merger", "takeover", "economies of scale"],
+    question: "Explain one way a business may benefit from economies of scale.",
+    answer: "A larger business may buy materials in bulk at discounted prices. This lowers the cost per unit and may increase profit margins if selling prices remain unchanged."
   },
   {
-    id:'segmentation',
-    section:'marketing',
-    sectionName:'Marketing',
-    title:'Market segmentation',
-    summary:'Learn how businesses divide markets and target customer groups.',
-    definition:'Market segmentation divides a market into groups of customers with similar characteristics or needs.',
-    points:[
-      ['Demographic','Age, income, occupation or family size.'],
-      ['Geographic','Country, region, climate or location.'],
-      ['Psychographic','Lifestyle, interests, attitudes and values.'],
-      ['Benefits','Marketing can be tailored to a group, although research and separate campaigns may increase costs.']
+    id: "external-influences",
+    section: "business",
+    sectionName: "Business Activity and Influences",
+    title: "External Influences on Business",
+    summary: "Economic, legal, social, technological and environmental influences.",
+    definition: "External influences are factors outside a business that can affect its decisions, performance and ability to achieve objectives.",
+    points: [
+      ["Economic conditions", "Inflation, interest rates, unemployment, exchange rates and economic growth can affect costs, demand and borrowing."],
+      ["Inflation", "A general rise in prices. It can increase wage and material costs and reduce consumers' purchasing power."],
+      ["Interest rates", "Higher rates can increase borrowing costs and discourage some consumer spending. Lower rates may make borrowing cheaper."],
+      ["Unemployment", "High unemployment can reduce consumer spending, although businesses may find it easier to recruit workers."],
+      ["Exchange rates", "A change in currency value affects the cost of imports and the revenue earned from exports."],
+      ["Legal influences", "Employment, consumer protection, health and safety and environmental laws can affect costs and business practices."],
+      ["Social influences", "Changes in tastes, demographics, lifestyles and ethical expectations can affect demand."],
+      ["Technological influences", "New technology can improve productivity and communication but may require investment and staff training."],
+      ["Environmental influences", "Businesses may face pressure to reduce waste, emissions and resource use."]
     ],
-    example:'A sportswear business may market lightweight clothing to customers in hot climates and insulated products to customers in colder regions.',
-    examTip:'Identify the segment, explain the need shared by that group, and connect it to a marketing decision or business outcome.',
-    keywords:['segmentation','target market','demographic','geographic','psychographic'],
-    question:'Explain one benefit of market segmentation.',
-    answer:'It helps a business tailor its product and promotion to a specific group’s needs, making marketing more relevant and potentially increasing sales.'
+    example: "If the currency used by a retailer weakens, imported stock may become more expensive, increasing costs unless the retailer changes suppliers or prices.",
+    examTip: "Use the direction of the change accurately. Explain how it affects costs or demand, then link that effect to sales, profit or another objective.",
+    keywords: ["inflation", "interest rates", "unemployment", "exchange rates", "law", "technology", "environment"],
+    question: "Explain how rising interest rates could affect a business that has borrowed money.",
+    answer: "Higher interest rates can increase the interest payments on borrowing. This raises costs and may reduce profit and the cash available for investment."
+  },
+
+  // SECTION 2: PEOPLE IN BUSINESS
+
+  {
+    id: "recruitment",
+    section: "people",
+    sectionName: "People in Business",
+    title: "Recruitment and Selection",
+    summary: "Recruitment methods, job descriptions, person specifications and choosing suitable employees.",
+    definition: "Recruitment is the process of attracting candidates to apply for a vacancy. Selection is the process of choosing the most suitable candidate.",
+    points: [
+      ["Identifying a vacancy", "A business may need a replacement employee or additional workers because it is expanding."],
+      ["Job analysis", "The business identifies the tasks and responsibilities involved in the job."],
+      ["Job description", "Explains duties, responsibilities, job title and reporting relationships."],
+      ["Person specification", "Sets out the qualifications, skills, experience and personal qualities needed."],
+      ["Internal recruitment", "Fills a vacancy using an existing employee. It may be quicker and cheaper, but reduces the choice of candidates and creates another vacancy."],
+      ["External recruitment", "Attracts candidates from outside the business. It provides a wider pool of applicants but can cost more and take longer."],
+      ["Recruitment methods", "Businesses may use their own website, job websites, recruitment agencies, social media or newspaper advertisements."],
+      ["Selection methods", "Applications, CVs, interviews, tests, assessment tasks and reference checks can help compare candidates."],
+      ["Advantages of good recruitment", "A suitable employee may be more productive, require less supervision and provide better customer service."],
+      ["Consequences of poor recruitment", "An unsuitable employee may make mistakes, require additional training, leave early or damage customer relationships."]
+    ],
+    example: "A hotel recruiting a receptionist may advertise online, shortlist candidates who meet the person specification and interview them to assess communication skills.",
+    examTip: "Distinguish recruitment from selection. Explain why a method is appropriate for the particular vacancy and business.",
+    keywords: ["recruitment", "selection", "job description", "person specification", "internal", "external", "interview"],
+    question: "Explain one advantage of internal recruitment.",
+    answer: "Internal recruitment can be quicker because the employee already understands the business. This may reduce induction time and allow the employee to become productive sooner."
   },
   {
-    id:'production',
-    section:'operations',
-    sectionName:'Business operations',
-    title:'Methods of production',
-    summary:'Compare job, batch and flow production.',
-    definition:'Production is the process of turning inputs, such as labour and materials, into goods or services.',
-    points:[
-      ['Job production','One item or a small customised order is made at a time. It can offer flexibility but may be costly and slow.'],
-      ['Batch production','A group of identical products is made before switching to another batch. It offers variety but may involve downtime.'],
-      ['Flow production','Standardised products move continuously through stages. It can achieve high output and low unit costs but requires substantial investment and can be inflexible.']
+    id: "employment-contracts",
+    section: "people",
+    sectionName: "People in Business",
+    title: "Employment Contracts and Employment Law",
+    summary: "Employment terms, working arrangements and legal responsibilities.",
+    definition: "An employment contract sets out the terms and conditions governing the relationship between an employer and an employee.",
+    points: [
+      ["Contract terms", "May cover job role, pay, working hours, holiday entitlement, workplace rules and notice periods."],
+      ["Full-time employment", "Usually involves working the normal full working week agreed by the employer."],
+      ["Part-time employment", "Involves fewer hours than a comparable full-time role."],
+      ["Temporary employment", "Employment for a limited period or to meet a short-term need."],
+      ["Permanent employment", "Employment without a predetermined end date, subject to the contract and applicable law."],
+      ["Flexible working", "May include adjusted hours or other arrangements where agreed and permitted."],
+      ["Employer responsibilities", "Employers must follow applicable employment, wage, health and safety and anti-discrimination requirements."],
+      ["Employee responsibilities", "Employees are expected to perform their duties, follow lawful workplace instructions and comply with relevant policies."],
+      ["Benefits of clear contracts", "Clear terms can reduce misunderstandings, help employees understand expectations and support consistent management."]
     ],
-    example:'A tailor may use job production, a bakery may produce batches of pastries, and a factory may use flow production for standardised bottled drinks.',
-    examTip:'Recommend a method based on product type, demand volume, variety, cost, skills and flexibility.',
-    keywords:['job production','batch production','flow production','productivity'],
-    question:'Which production method is often suitable for large volumes of standardised products?',
-    answer:'Flow production is often suitable because products move through a sequence of stages, supporting high output and potentially low unit costs.'
+    example: "A retailer may hire temporary staff during a busy holiday period to meet higher customer demand without making all the positions permanent.",
+    examTip: "Employment law varies by country. Apply the legal requirements specified in the question rather than assuming that every country's rules are identical.",
+    keywords: ["employment contract", "full-time", "part-time", "temporary", "permanent", "employment law"],
+    question: "Explain one reason why a business might employ temporary workers.",
+    answer: "Temporary workers allow the business to increase staffing during a seasonal peak. This helps serve more customers without committing to the same number of employees all year."
   },
   {
-    id:'quality',
-    section:'operations',
-    sectionName:'Business operations',
-    title:'Quality and customer service',
-    summary:'Understand quality control, quality assurance and the impact of quality.',
-    definition:'Quality means how well a product or service meets customer expectations and required standards.',
-    points:[
-      ['Quality control','Products or output are checked for defects, often during or after production.'],
-      ['Quality assurance','Processes are designed to prevent defects and maintain standards throughout production.'],
-      ['Benefits of quality','Fewer returns and complaints, stronger reputation and repeat purchases.'],
-      ['Trade-offs','Quality systems and staff training can add costs, but poor quality can be more expensive over time.']
+    id: "training",
+    section: "people",
+    sectionName: "People in Business",
+    title: "Training and Development",
+    summary: "Induction, on-the-job training, off-the-job training and their effects on performance.",
+    definition: "Training develops employees' knowledge and skills so they can perform their jobs effectively.",
+    points: [
+      ["Induction training", "Introduces new employees to the business, workplace rules, colleagues, procedures and health and safety arrangements."],
+      ["On-the-job training", "Employees learn while carrying out their work, often with guidance from an experienced colleague."],
+      ["Advantages of on-the-job training", "It is practical and relevant to the actual role and may be relatively inexpensive."],
+      ["Disadvantages of on-the-job training", "The trainer may be less productive, and poor techniques could be passed on."],
+      ["Off-the-job training", "Takes place away from normal duties, for example through courses, workshops or specialist training centres."],
+      ["Advantages of off-the-job training", "Employees may learn from specialists and focus on developing skills without normal workplace distractions."],
+      ["Disadvantages of off-the-job training", "It may be expensive and employees may be away from work during training."],
+      ["Benefits of training", "Can improve productivity, quality, safety, confidence, motivation and customer service."],
+      ["Training costs", "Include course fees, trainer wages, materials and the output lost while employees are training."]
     ],
-    example:'A food producer may check samples for defects and train staff to follow consistent hygiene and production procedures.',
-    examTip:'Link quality to customer satisfaction, reputation, repeat sales, waste, costs and competitiveness.',
-    keywords:['quality control','quality assurance','customer service','defects','reputation'],
-    question:'Give one possible benefit of improving product quality.',
-    answer:'Higher quality may reduce complaints and returns, helping protect the business’s reputation and encourage repeat purchases.'
+    example: "A restaurant trains new staff in food hygiene and customer service. Better skills may reduce mistakes and improve customer satisfaction.",
+    examTip: "Balance training's costs against its likely benefits. The best method depends on the job, the skills required and the business's resources.",
+    keywords: ["training", "induction", "on-the-job", "off-the-job", "productivity", "skills"],
+    question: "Explain one benefit of induction training for a new employee.",
+    answer: "Induction explains workplace procedures and safety rules. This can reduce early mistakes and help the employee become productive more quickly."
   },
   {
-    id:'location',
-    section:'operations',
-    sectionName:'Business operations',
-    title:'Business location and production costs',
-    summary:'Explore factors that influence where a business operates.',
-    definition:'Business location is the place where a business carries out its activities.',
-    points:[
-      ['Customers and market','Retailers may need to be near customers; online businesses may prioritise distribution access.'],
-      ['Costs','Rent, wages, transport and utilities affect operating costs.'],
-      ['Labour and suppliers','Businesses may locate near suitable workers, raw materials or suppliers.'],
-      ['Other factors','Infrastructure, competitors, laws, government incentives and environmental impacts can matter.']
+    id: "motivation",
+    section: "people",
+    sectionName: "People in Business",
+    title: "Employee Motivation",
+    summary: "Why motivation matters and how financial and non-financial rewards influence employees.",
+    definition: "Motivation is the willingness of employees to work hard and use their abilities to help achieve business objectives.",
+    points: [
+      ["Financial rewards", "Include wages, salaries, bonuses, commission and performance-related pay."],
+      ["Wages", "Payment commonly calculated according to hours worked or units produced."],
+      ["Salary", "A fixed amount of pay usually paid monthly or annually."],
+      ["Bonus", "An additional payment that may reward performance or achievement."],
+      ["Commission", "Payment linked to sales achieved. It can encourage selling but may create pressure or encourage unsuitable sales."],
+      ["Performance-related pay", "Links some pay to measured performance or results."],
+      ["Non-financial rewards", "Include recognition, responsibility, promotion, job enrichment, flexible working and a supportive working environment."],
+      ["Job enrichment", "Makes a role more interesting or challenging by adding responsibility or variety."],
+      ["Effects of motivation", "Motivated employees may work harder, improve customer service, reduce absenteeism and stay longer."],
+      ["Limits of rewards", "A reward that motivates one employee may not motivate another. Poor management, excessive workload or unfair pay can undermine motivation."]
     ],
-    example:'A warehouse may choose a site near major roads to speed up deliveries, even if rent is slightly higher.',
-    examTip:'Prioritise the most important factor for the business in the question and explain the effect on costs, sales or service.',
-    keywords:['location','transport','labour','suppliers','costs'],
-    question:'Why might a manufacturer locate near its suppliers?',
-    answer:'It may reduce the time and cost of transporting raw materials, helping production run reliably and potentially reducing total costs.'
+    example: "A salesperson receiving commission may make greater efforts to secure sales, but the business must ensure that sales remain suitable for customers.",
+    examTip: "Do not assume that higher pay always produces the best result. Consider employee needs, fairness, costs and the type of work.",
+    keywords: ["motivation", "wages", "salary", "bonus", "commission", "job enrichment", "performance-related pay"],
+    question: "Explain how a bonus could improve employee performance.",
+    answer: "A bonus gives employees a financial reward for achieving a target. They may work harder to reach it, potentially increasing sales or output, although the bonus also costs the business money."
+  },
+  {
+    id: "organisational-structure",
+    section: "people",
+    sectionName: "People in Business",
+    title: "Organisational Structure",
+    summary: "Hierarchy, chain of command, span of control, delegation and layers of management.",
+    definition: "Organisational structure describes how roles, responsibilities and authority are arranged within a business.",
+    points: [
+      ["Hierarchy", "The levels of authority within a business, from senior management to employees."],
+      ["Chain of command", "The route through which instructions and information pass from one level of the organisation to another."],
+      ["Span of control", "The number of employees directly supervised by a manager."],
+      ["Levels of hierarchy", "A tall structure has many management levels; a flat structure has fewer levels."],
+      ["Tall structures", "May provide close supervision and clear promotion levels, but communication can be slower and management costs higher."],
+      ["Flat structures", "May allow faster communication and greater employee responsibility, but managers may have too many people to supervise effectively."],
+      ["Delegation", "Passing authority to a subordinate to carry out tasks while the manager remains accountable for overall results."],
+      ["Centralisation", "Important decisions are concentrated among senior managers."],
+      ["Decentralisation", "Decision-making authority is shared with lower-level managers or other parts of the business."],
+      ["Choosing a structure", "Depends on business size, complexity, employee skills, management preferences and the need for control."]
+    ],
+    example: "A small café may have a flat structure with the owner managing staff directly. A multinational company is more likely to need several management levels.",
+    examTip: "Use the business's size and complexity to justify why a structure is suitable. A flat structure is not automatically better than a tall one.",
+    keywords: ["hierarchy", "chain of command", "span of control", "delegation", "centralisation", "decentralisation"],
+    question: "Explain one advantage of delegation.",
+    answer: "Delegation allows a manager to pass routine decisions to trained employees. This frees the manager to focus on strategic tasks and may improve employee confidence."
+  },
+  {
+    id: "communication",
+    section: "people",
+    sectionName: "People in Business",
+    title: "Communication in Business",
+    summary: "Internal and external communication, methods, barriers and effective communication.",
+    definition: "Communication is the process of sending and receiving information between individuals or groups.",
+    points: [
+      ["Internal communication", "Information exchanged within the business, such as instructions between managers and employees."],
+      ["External communication", "Information exchanged with customers, suppliers, lenders, government or other outside groups."],
+      ["Verbal communication", "Spoken communication, including face-to-face conversations, meetings and phone calls."],
+      ["Written communication", "Includes emails, reports, letters, notices and instructions."],
+      ["Digital communication", "Includes messaging platforms, video calls, shared documents and business systems."],
+      ["Choosing a method", "Consider urgency, cost, confidentiality, complexity and whether a permanent record is needed."],
+      ["Communication barriers", "Language differences, noise, unclear wording, information overload, poor technology and long chains of command."],
+      ["Two-way communication", "Allows the receiver to respond and ask questions, helping identify misunderstandings."],
+      ["Benefits of effective communication", "Can reduce mistakes, improve coordination, support motivation and help deliver better customer service."]
+    ],
+    example: "A manager gives unclear instructions about a customer order. Staff may prepare the wrong item, causing waste and customer dissatisfaction.",
+    examTip: "Link the communication method or barrier to a clear consequence, such as fewer errors, faster decisions or lower customer satisfaction.",
+    keywords: ["communication", "internal", "external", "verbal", "written", "barriers", "feedback"],
+    question: "Explain one advantage of two-way communication between managers and employees.",
+    answer: "Employees can ask questions and provide feedback. This helps managers identify misunderstandings before they lead to mistakes or delays."
+  },
+  {
+    id: "leadership",
+    section: "people",
+    sectionName: "People in Business",
+    title: "Leadership and Management",
+    summary: "Leadership styles and how managers guide, motivate and coordinate employees.",
+    definition: "Leadership involves influencing and guiding people towards shared objectives. Management involves planning, organising and controlling business activities.",
+    points: [
+      ["Autocratic leadership", "The leader makes decisions with limited employee input. It can be useful in emergencies but may reduce motivation if used excessively."],
+      ["Democratic leadership", "Employees contribute ideas before decisions are made. It may improve commitment but can take longer."],
+      ["Laissez-faire leadership", "Employees receive substantial independence. It can work with skilled, self-motivated teams but may create confusion without sufficient direction."],
+      ["Communication", "Managers explain goals, provide instructions and give feedback."],
+      ["Decision-making", "Managers choose how to allocate resources, solve problems and respond to changes."],
+      ["Monitoring performance", "Managers compare actual performance with targets and take action when results fall short."],
+      ["Leadership and motivation", "The style used can affect employee confidence, commitment, productivity and willingness to contribute ideas."],
+      ["Choosing a style", "Depends on urgency, employee experience, the nature of the task and the level of risk."]
+    ],
+    example: "During a safety emergency, a manager may use an autocratic approach to give immediate instructions. For a new advertising campaign, democratic discussion may generate more ideas.",
+    examTip: "Avoid claiming one leadership style is always best. Explain why the style suits the specific task and employees.",
+    keywords: ["leadership", "management", "autocratic", "democratic", "laissez-faire", "decision-making"],
+    question: "Explain one situation in which democratic leadership may be suitable.",
+    answer: "Democratic leadership may suit a team developing a new product because employees can contribute different ideas. Their involvement may improve the decision and increase commitment to implementing it."
+  },
+
+  // SECTION 3: BUSINESS FINANCE
+
+  {
+    id: "cashflow",
+    section: "finance",
+    sectionName: "Business Finance",
+    title: "Cash Flow and Cash-Flow Forecasts",
+    summary: "Cash inflows, outflows, net cash flow and the importance of liquidity.",
+    definition: "Cash flow is the movement of money into and out of a business over a period of time.",
+    points: [
+      ["Cash inflows", "Money received, such as cash sales, payments from customers, loans and investment."],
+      ["Cash outflows", "Money paid out, such as wages, rent, supplier payments, equipment purchases and loan repayments."],
+      ["Net cash flow", "Calculated as total cash inflows minus total cash outflows for a period."],
+      ["Opening balance", "The cash available at the start of the period."],
+      ["Closing balance", "Opening balance plus net cash flow for the period."],
+      ["Cash-flow forecast", "An estimate of expected future cash inflows and outflows."],
+      ["Cash-flow problems", "Can occur when customers pay late, sales are low, costs rise or large payments fall due."],
+      ["Improving cash flow", "A business may speed up customer payments, negotiate longer supplier credit, reduce unnecessary spending or arrange finance."],
+      ["Liquidity", "The ability to meet short-term payment obligations when they become due."]
+    ],
+    example: "A business has inflows of QAR 8,000 and outflows of QAR 6,500. Net cash flow is QAR 1,500.",
+    examTip: "Cash flow is not the same as profit. A profitable business can still run out of cash if customers have not paid yet.",
+    keywords: ["cash flow", "inflows", "outflows", "net cash flow", "opening balance", "closing balance", "liquidity"],
+    question: "Opening balance is QAR 2,000, inflows are QAR 7,000 and outflows are QAR 8,500. Calculate closing balance.",
+    answer: "Net cash flow = QAR 7,000 − QAR 8,500 = −QAR 1,500. Closing balance = QAR 2,000 − QAR 1,500 = QAR 500."
+  },
+  {
+    id: "costsrevenueprofit",
+    section: "finance",
+    sectionName: "Business Finance",
+    title: "Costs, Revenue and Profit",
+    summary: "Fixed and variable costs, total costs, revenue and profit calculations.",
+    definition: "Revenue is the money earned from sales. Profit is the amount remaining when total costs are deducted from revenue.",
+    points: [
+      ["Fixed costs", "Costs that do not change directly with output in the short run, such as rent."],
+      ["Variable costs", "Costs that change with output, such as materials used to make each product."],
+      ["Total costs", "Fixed costs plus total variable costs."],
+      ["Revenue", "Selling price per unit multiplied by quantity sold."],
+      ["Profit", "Total revenue minus total costs."],
+      ["Loss", "Occurs when total costs exceed total revenue."],
+      ["Reducing costs", "Businesses may negotiate with suppliers, reduce waste or improve productivity."],
+      ["Increasing profit", "A business may increase sales revenue, reduce costs or change its product mix, depending on market conditions."]
+    ],
+    example: "A business sells 100 items at QAR 20 each. Revenue is QAR 2,000. If total costs are QAR 1,400, profit is QAR 600.",
+    examTip: "Show your formula and working. Revenue is not profit, and fixed costs do not mean costs never change over time.",
+    keywords: ["fixed costs", "variable costs", "total costs", "revenue", "profit", "loss"],
+    question: "A business sells 80 units for QAR 15 each and has total costs of QAR 900. Calculate its profit.",
+    answer: "Revenue = 80 × QAR 15 = QAR 1,200. Profit = QAR 1,200 − QAR 900 = QAR 300."
+  },
+  {
+    id: "break-even",
+    section: "finance",
+    sectionName: "Business Finance",
+    title: "Break-Even Analysis",
+    summary: "Break-even output, contribution, margin of safety and limitations.",
+    definition: "Break-even is the level of output at which total revenue equals total costs, so the business makes neither a profit nor a loss.",
+    points: [
+      ["Contribution per unit", "Selling price per unit minus variable cost per unit."],
+      ["Break-even output", "Fixed costs divided by contribution per unit."],
+      ["Margin of safety", "Actual or expected output minus break-even output."],
+      ["Output below break-even", "The business makes a loss if its assumptions hold."],
+      ["Output above break-even", "The business makes a profit if its assumptions hold."],
+      ["Uses", "Helps estimate the sales volume needed to cover costs and assess the effect of changing prices or costs."],
+      ["Limitations", "Forecasts may be inaccurate; prices, variable costs and demand can change; not all output may be sold."]
+    ],
+    example: "Selling price is QAR 20, variable cost is QAR 8 and fixed costs are QAR 600. Contribution is QAR 12, so break-even output is 600 ÷ 12 = 50 units.",
+    examTip: "Break-even output is usually rounded up to a whole unit when calculating the minimum number of units required to cover costs.",
+    keywords: ["break-even", "contribution", "margin of safety", "fixed costs", "variable costs"],
+    question: "Fixed costs are QAR 1,000, selling price is QAR 30 and variable cost is QAR 10. Calculate break-even output.",
+    answer: "Contribution per unit = QAR 30 − QAR 10 = QAR 20. Break-even output = QAR 1,000 ÷ QAR 20 = 50 units."
+  },
+
+  // SECTION 4: MARKETING
+
+  {
+    id: "market-research",
+    section: "marketing",
+    sectionName: "Marketing",
+    title: "Market Research",
+    summary: "Primary and secondary research, qualitative and quantitative data, sampling and limitations.",
+    definition: "Market research is the collection and analysis of information about customers, competitors and markets.",
+    points: [
+      ["Primary research", "New information collected directly for a specific purpose, such as surveys, interviews, observation or focus groups."],
+      ["Secondary research", "Information already collected by another organisation or for another purpose, such as reports, statistics and existing sales records."],
+      ["Quantitative data", "Numerical information that can be counted or measured."],
+      ["Qualitative data", "Descriptive information about opinions, preferences and reasons."],
+      ["Questionnaires", "Can gather responses from many people, but poorly worded questions or unrepresentative respondents may distort findings."],
+      ["Interviews and focus groups", "Can explore opinions in detail but may take time and involve relatively small samples."],
+      ["Sampling", "Selecting a group of people to represent a wider target population."],
+      ["Reliability and bias", "Results depend on sample size, question wording, respondent honesty and whether the sample represents the target market."],
+      ["Using research", "Can help estimate demand, choose prices, improve products and understand competitors."]
+    ],
+    example: "A sports shop surveys local football players before deciding which boots to stock. It must ensure that the respondents represent its likely customers.",
+    examTip: "Explain how the research helps a specific decision. Research reduces uncertainty but cannot guarantee that customers will behave as predicted.",
+    keywords: ["market research", "primary research", "secondary research", "qualitative", "quantitative", "sampling"],
+    question: "Explain one advantage of primary research for a business launching a new product.",
+    answer: "Primary research can gather information about the specific product and target customers. This may help the business adjust features before launch, reducing the risk of weak demand."
+  },
+  {
+    id: "marketing-mix",
+    section: "marketing",
+    sectionName: "Marketing",
+    title: "The Marketing Mix: 4Ps",
+    summary: "Product, price, promotion and place, and how they work together.",
+    definition: "The marketing mix is the combination of product, price, promotion and place decisions used to market a product.",
+    points: [
+      ["Product", "Includes design, features, quality, packaging, branding and after-sales service."],
+      ["Price", "Must consider costs, customer willingness to pay, competitors and the business's objectives."],
+      ["Cost-plus pricing", "Adds a chosen amount or percentage to unit cost. It is simple but may ignore demand and competitor prices."],
+      ["Competitive pricing", "Sets a price with reference to competitors' prices."],
+      ["Penetration pricing", "Uses a relatively low initial price to attract customers and gain market share."],
+      ["Promotion", "Includes advertising, sales promotions, public relations, sponsorship and personal selling."],
+      ["Place", "Concerns where and how customers obtain the product, including shops, websites and delivery channels."],
+      ["Consistency", "The four elements should support the same target market and positioning."]
+    ],
+    example: "A premium sportswear brand may use high-quality materials, premium prices, athlete sponsorship and specialist retail outlets.",
+    examTip: "Explain why a marketing decision fits the target market. A low price may attract price-sensitive customers but could reduce profit per unit.",
+    keywords: ["marketing mix", "product", "price", "promotion", "place", "penetration pricing", "competitive pricing"],
+    question: "Explain one reason a new business might use penetration pricing.",
+    answer: "A low introductory price may encourage customers to try an unfamiliar product, helping the business gain market share. However, the low price may initially limit profit per unit."
+  },
+  {
+    id: "segmentation",
+    section: "marketing",
+    sectionName: "Marketing",
+    title: "Market Segmentation and Targeting",
+    summary: "Dividing markets into groups and choosing the customers a business wants to serve.",
+    definition: "Market segmentation is dividing a market into groups of customers with similar characteristics or needs.",
+    points: [
+      ["Demographic segmentation", "Groups customers by characteristics such as age, income, family size or occupation."],
+      ["Geographic segmentation", "Groups customers by location, region, climate or population density."],
+      ["Psychographic segmentation", "Groups customers by lifestyle, interests, values or attitudes."],
+      ["Behavioural segmentation", "Groups customers by purchasing habits, loyalty or how they use a product."],
+      ["Target market", "The particular customer group a business chooses to serve."],
+      ["Benefits", "Can help tailor products, promotions and prices, making marketing more relevant."],
+      ["Limitations", "Research and tailored marketing can cost money, and a narrow target market may restrict potential sales."]
+    ],
+    example: "A company selling high-performance football boots may target competitive players who value grip, lightweight materials and performance.",
+    examTip: "Identify the segment and explain how the marketing decision matches its needs, rather than simply naming a segmentation method.",
+    keywords: ["segmentation", "demographic", "geographic", "psychographic", "behavioural", "target market"],
+    question: "Explain one benefit of market segmentation.",
+    answer: "Segmentation allows a business to target customers with similar needs. Its promotion can focus on features those customers value, making marketing more effective."
+  },
+
+  // SECTION 5: BUSINESS OPERATIONS
+
+  {
+    id: "production",
+    section: "operations",
+    sectionName: "Business Operations",
+    title: "Methods of Production",
+    summary: "Job, batch and flow production and choosing an appropriate method.",
+    definition: "Production is the process of transforming resources into goods or services.",
+    points: [
+      ["Job production", "Making an individual product to a particular customer's requirements. It can be customised but may be slow and expensive per unit."],
+      ["Batch production", "Producing a group of identical or similar products before switching to another batch. It offers some variety but may involve storage and changeover costs."],
+      ["Flow production", "Producing standardised items continuously along a production line. It can achieve high output and low unit costs but often requires substantial investment."],
+      ["Productivity", "Output produced per unit of input, such as output per worker per hour."],
+      ["Automation", "Using machinery or computer-controlled equipment to carry out tasks. It may improve consistency but can be expensive to install and maintain."],
+      ["Choosing production", "Depends on demand, product variety, customisation, available finance, skill requirements and output volume."]
+    ],
+    example: "A tailor may use job production for a custom suit, while a drinks manufacturer may use flow production for large quantities of standard bottles.",
+    examTip: "Relate the production method to volume, variety and cost. A method suitable for mass-market products may be unsuitable for customised orders.",
+    keywords: ["job production", "batch production", "flow production", "productivity", "automation"],
+    question: "Explain one advantage of flow production for a business making large quantities of identical products.",
+    answer: "Flow production allows repeated tasks to be carried out continuously, increasing output and potentially reducing labour cost per unit."
+  },
+  {
+    id: "quality",
+    section: "operations",
+    sectionName: "Business Operations",
+    title: "Quality and Quality Control",
+    summary: "Quality control, quality assurance and the benefits of maintaining standards.",
+    definition: "Quality refers to how well a product or service meets customer expectations and required standards.",
+    points: [
+      ["Quality control", "Checks products or output for defects, often through inspection at particular stages or at the end."],
+      ["Quality assurance", "Uses procedures and systems throughout the production process to prevent errors and maintain standards."],
+      ["Customer satisfaction", "Consistent quality can increase trust, repeat purchases and positive recommendations."],
+      ["Costs of poor quality", "Defects can cause waste, returns, repairs, complaints, refunds and reputational damage."],
+      ["Quality costs", "Inspection, training, better materials and quality systems require resources."],
+      ["Choosing an approach", "Depends on the product, safety requirements, production process, costs and customer expectations."]
+    ],
+    example: "A manufacturer checks finished bicycle brakes to identify defects before products reach customers.",
+    examTip: "Explain how quality affects both costs and customers. Quality improvements may cost money initially but reduce waste and complaints later.",
+    keywords: ["quality", "quality control", "quality assurance", "defects", "customer satisfaction"],
+    question: "Explain one benefit of quality assurance.",
+    answer: "Quality assurance aims to prevent errors throughout production. This may reduce defective output and the cost of repairing or replacing products."
+  },
+  {
+    id: "location",
+    section: "operations",
+    sectionName: "Business Operations",
+    title: "Business Location",
+    summary: "Factors influencing where a business locates its operations.",
+    definition: "Business location is the place where a business carries out its activities.",
+    points: [
+      ["Customers", "Retailers may choose locations near target customers to increase convenience and sales."],
+      ["Labour", "Businesses consider the availability, skills and cost of workers."],
+      ["Suppliers and materials", "Manufacturers may locate near key suppliers to reduce transport costs and delays."],
+      ["Transport and infrastructure", "Roads, ports, airports, utilities and internet access can affect costs and reliability."],
+      ["Costs", "Rent, land prices, wages, taxes and utilities can differ between locations."],
+      ["Competition", "A business may locate near competitors to benefit from customer traffic or choose an area with less competition."],
+      ["Government and regulation", "Planning rules, tax arrangements and restrictions can affect location decisions."],
+      ["Online business", "An online retailer may need less customer-facing space but still requires suitable storage, delivery and digital infrastructure."]
+    ],
+    example: "A warehouse may locate near a major highway to speed up deliveries and reduce transport time.",
+    examTip: "There is rarely one best location for every business. Prioritise factors according to the business's industry, customers and objectives.",
+    keywords: ["location", "labour", "suppliers", "transport", "rent", "customers", "infrastructure"],
+    question: "Explain why a manufacturer might locate near its main suppliers.",
+    answer: "Being close to suppliers can reduce transport costs and delivery times. This may lower production costs and reduce the risk of production delays caused by missing materials."
   }
 ];
 
 window.BUSINESS_QUIZ = [
   {
-    q:'Which of the following is a non-financial business objective?',
-    options:['Increase market share','Achieve survival','Improve personal satisfaction','Increase profit'],
-    answer:2,
-    explanation:'Personal satisfaction is a non-financial objective. Profit, market share and survival are commonly classified as financial objectives in this specification.'
+    q: "What is added value?",
+    options: [
+      "Total sales revenue",
+      "Selling price minus the cost of bought-in materials",
+      "Total costs minus fixed costs",
+      "Profit after tax"
+    ],
+    answer: 1,
+    explanation: "Added value is selling price minus the cost of bought-in materials and components."
   },
   {
-    q:'What is net cash flow for a period?',
-    options:['Revenue minus total costs','Cash inflows minus cash outflows','Fixed costs plus variable costs','Selling price minus variable cost'],
-    answer:1,
-    explanation:'Net cash flow is calculated by subtracting cash outflows from cash inflows for the period.'
+    q: "Which is an example of the primary sector?",
+    options: [
+      "Car manufacturing",
+      "Supermarket retailing",
+      "Fishing",
+      "Banking"
+    ],
+    answer: 2,
+    explanation: "Fishing obtains natural resources and is part of the primary sector."
   },
   {
-    q:'A product sells for QAR 15 and has a variable cost of QAR 9 per unit. What is contribution per unit?',
-    options:['QAR 6','QAR 9','QAR 15','QAR 24'],
-    answer:0,
-    explanation:'Contribution per unit = selling price − variable cost = QAR 15 − QAR 9 = QAR 6.'
+    q: "Which ownership type generally offers shareholders limited liability?",
+    options: [
+      "Sole trader",
+      "Private limited company",
+      "Ordinary partnership",
+      "Informal club"
+    ],
+    answer: 1,
+    explanation: "Shareholders in a limited company generally have limited liability, subject to legal exceptions."
   },
   {
-    q:'Which is an example of secondary market research?',
-    options:['Interviewing 20 customers','Running a new focus group','Observing shoppers in a store','Reading a published industry report'],
-    answer:3,
-    explanation:'A published report already exists, so using it is secondary research.'
+    q: "What is the main purpose of a person specification?",
+    options: [
+      "To list the business's suppliers",
+      "To describe the required candidate's skills and qualities",
+      "To record annual profits",
+      "To set the selling price"
+    ],
+    answer: 1,
+    explanation: "A person specification identifies the qualifications, experience and personal qualities needed for a role."
   },
   {
-    q:'Which production method is usually most suitable for customised one-off products?',
-    options:['Flow production','Job production','Mass production only','Continuous production'],
-    answer:1,
-    explanation:'Job production is suited to one-off or highly customised work, although it can be slower and more expensive per unit.'
+    q: "Which is an example of on-the-job training?",
+    options: [
+      "An employee attends an external college course",
+      "An employee learns a task while working with an experienced colleague",
+      "A business purchases new equipment",
+      "A customer completes a survey"
+    ],
+    answer: 1,
+    explanation: "On-the-job training takes place while the employee carries out work."
   },
   {
-    q:'What does limited liability generally mean for shareholders?',
-    options:['They must pay all company debts personally','They cannot lose any money invested','Their personal liability is generally limited to their investment','They are guaranteed a dividend'],
-    answer:2,
-    explanation:'Shareholders generally risk the amount invested in their shares rather than being personally responsible for all company debts, subject to legal exceptions.'
+    q: "Which payment is directly linked to sales achieved?",
+    options: [
+      "Commission",
+      "Rent",
+      "Insurance",
+      "A supplier invoice"
+    ],
+    answer: 0,
+    explanation: "Commission is a payment linked to sales results."
   },
   {
-    q:'Which is an example of a variable cost?',
-    options:['Monthly rent under a fixed lease','Annual insurance premium','Raw materials used for each unit','A fixed licence fee'],
-    answer:2,
-    explanation:'Raw material costs usually rise as more units are produced, so they are variable costs.'
+    q: "What does span of control mean?",
+    options: [
+      "Number of products a business sells",
+      "Number of employees directly supervised by a manager",
+      "Number of business locations",
+      "Length of the working day"
+    ],
+    answer: 1,
+    explanation: "Span of control is the number of employees who report directly to a manager."
   },
   {
-    q:'What is one purpose of a person specification?',
-    options:['Describe the qualities and skills needed for a job','Calculate business profit','Set the product price','Forecast cash inflows'],
-    answer:0,
-    explanation:'A person specification outlines the qualifications, skills and personal qualities required for a role.'
+    q: "A business has inflows of QAR 9,000 and outflows of QAR 6,000. What is its net cash flow?",
+    options: ["QAR 3,000", "QAR 6,000", "QAR 9,000", "QAR 15,000"],
+    answer: 0,
+    explanation: "Net cash flow = inflows − outflows = QAR 9,000 − QAR 6,000 = QAR 3,000."
   },
   {
-    q:'Which part of the marketing mix concerns distribution?',
-    options:['Product','Price','Promotion','Place'],
-    answer:3,
-    explanation:'Place concerns where and how the product reaches customers, including distribution channels.'
+    q: "A product sells for QAR 40 and has variable cost of QAR 15 per unit. What is its contribution per unit?",
+    options: ["QAR 15", "QAR 25", "QAR 40", "QAR 55"],
+    answer: 1,
+    explanation: "Contribution = selling price − variable cost = QAR 40 − QAR 15 = QAR 25."
   },
   {
-    q:'Why might a business use a cash-flow forecast?',
-    options:['To guarantee future profit','To anticipate periods when cash may be insufficient','To remove all business risk','To calculate employee motivation'],
-    answer:1,
-    explanation:'A cash-flow forecast estimates future receipts and payments, helping a business identify potential cash shortages in advance.'
+    q: "Which is an example of primary market research?",
+    options: [
+      "Reading an old industry report",
+      "Using published government statistics",
+      "Interviewing potential customers",
+      "Reading a competitor's annual report"
+    ],
+    answer: 2,
+    explanation: "Interviewing potential customers collects new information directly from respondents."
+  },
+  {
+    q: "What is market segmentation?",
+    options: [
+      "Increasing the number of employees",
+      "Dividing a market into groups with similar characteristics",
+      "Reducing every product's price",
+      "Combining two businesses"
+    ],
+    answer: 1,
+    explanation: "Segmentation divides customers into groups with similar needs or characteristics."
+  },
+  {
+    q: "Which production method is usually most suitable for highly customised products?",
+    options: [
+      "Flow production",
+      "Job production",
+      "Continuous mass production only",
+      "Automated production only"
+    ],
+    answer: 1,
+    explanation: "Job production allows an individual product to be made to a customer's specific requirements."
+  },
+  {
+    q: "What is one purpose of quality control?",
+    options: [
+      "To inspect output for defects",
+      "To increase rent",
+      "To recruit suppliers",
+      "To calculate market share"
+    ],
+    answer: 0,
+    explanation: "Quality control uses inspection or checks to identify products that do not meet standards."
+  },
+  {
+    q: "Which factor is most likely to matter to a retailer choosing a shop location?",
+    options: [
+      "Proximity to its target customers",
+      "The colour of the owner's car",
+      "The number of competitors worldwide",
+      "The owner's favourite holiday destination"
+    ],
+    answer: 0,
+    explanation: "A convenient location near target customers can increase visits and sales."
+  },
+  {
+    q: "What is the main aim of break-even analysis?",
+    options: [
+      "To calculate employee motivation",
+      "To identify output where total revenue equals total costs",
+      "To measure customer satisfaction",
+      "To calculate market population"
+    ],
+    answer: 1,
+    explanation: "At break-even, total revenue equals total costs, so there is no profit or loss."
   }
 ];
