@@ -1,99 +1,116 @@
 
-window.BusinessLocalAIReady = Promise.resolve({
-  async ask(question, selectedTopic = "") {
-    const q = String(question || "").trim().toLowerCase();
+(() => {
+  "use strict";
 
-    if (!q) {
-      return "Please enter a question.";
-    }
-
-    const topics = Array.isArray(window.BUSINESS_TOPICS)
+  function getTopics() {
+    return Array.isArray(window.BUSINESS_TOPICS)
       ? window.BUSINESS_TOPICS
       : [];
+  }
 
-    if (!topics.length) {
-      return "No revision content was found. Please check that content.js and the other content files are loaded.";
+  function flatten(value) {
+    if (value == null) return "";
+    if (Array.isArray(value)) return value.map(flatten).join("\n");
+    if (typeof value === "object") {
+      return Object.entries(value)
+        .map(([key, item]) => `${key}: ${flatten(item)}`)
+        .join("\n");
+    }
+    return String(value);
+  }
+
+  function getTopicText(topic) {
+    return flatten(topic);
+  }
+
+  function normalise(text) {
+    return String(text || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function ask(question, selectedTopic = "") {
+    const originalQuestion = String(question || "").trim();
+
+    if (!originalQuestion) {
+      return Promise.resolve("Please enter a question first.");
     }
 
-    const words = q.split(/[^a-z0-9]+/).filter(w => w.length > 1);
+    const topics = getTopics();
 
-    const results = topics.map(topic => {
-      const title = topic.title || topic.name || "Business topic";
-      const text = [
-        title,
-        topic.section,
-        topic.definition,
-        topic.description,
-        topic.content,
-        topic.explanation,
-        topic.examTechnique,
-        topic.keyTerms,
-        topic.example
-      ].flat().filter(Boolean).join(" ");
+    if (!topics.length) {
+      return Promise.resolve(
+        "Revision content could not be loaded. Check that content.js, content2.js, content3.js and content4.js are included in index.html before app.js."
+      );
+    }
 
-      const searchable = text.toLowerCase();
+    const query = normalise(originalQuestion);
+    const words = query.split(" ").filter(word => word.length > 2);
+
+    const results = topics.map((topic, index) => {
+      const title = topic.title || topic.name || `Topic ${index + 1}`;
+      const searchable = normalise(getTopicText(topic));
       let score = 0;
 
       for (const word of words) {
         if (searchable.includes(word)) score += 1;
-        if (String(title).toLowerCase().includes(word)) score += 3;
+        if (normalise(title).includes(word)) score += 4;
       }
 
-      if (
-        selectedTopic &&
-        selectedTopic !== "All topics" &&
-        String(title).toLowerCase() === selectedTopic.toLowerCase()
-      ) {
-        score += 10;
-      }
-
-      return { topic, title, score };
-    });
-
-    const matches = results
-      .filter(item => item.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 4);
-
-    if (!matches.length) {
-      return "I couldn't find a close match in the revision notes. Try using a specific Business term, such as cash flow, market segmentation, motivation, or economies of scale.";
-    }
-
-    return matches.map(({ topic, title }) => {
-      const sections = [];
-
-      for (const key of [
-        "definition",
-        "description",
-        "explanation",
-        "content",
-        "example",
-        "examTechnique",
-        "keyTerms"
-      ]) {
-        const value = topic[key];
-
-        if (Array.isArray(value)) {
-          if (value.length) sections.push(value.join("\n"));
-        } else if (typeof value === "string" && value.trim()) {
-          sections.push(value.trim());
+      if (selectedTopic && selectedTopic !== "All topics") {
+        const selected = normalise(selectedTopic);
+        if (
+          normalise(title) === selected ||
+          normalise(topic.id) === selected ||
+          normalise(topic.section) === selected
+        ) {
+          score += 8;
         }
       }
 
-      if (!sections.length) {
-        sections.push(
-          Object.entries(topic)
-            .filter(([key, value]) =>
-              !["id", "title", "name", "section"].includes(key) &&
-              typeof value === "string" &&
-              value.trim()
-            )
-            .map(([key, value]) => `${key}: ${value}`)
-            .join("\n")
-        );
+      return { topic, title, score, index };
+    });
+
+    const matches = results
+      .filter(result => result.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5);
+
+    if (!matches.length) {
+      return Promise.resolve(
+        "I couldn't find matching information in the existing revision notes. Try a specific term such as cash flow, market research, motivation, profit, or economies of scale."
+      );
+    }
+
+    const answer = matches.map(({ topic, title }) => {
+      const lines = [];
+
+      for (const [key, value] of Object.entries(topic)) {
+        if (
+          ["id", "title", "name"].includes(key) ||
+          value == null ||
+          value === ""
+        ) continue;
+
+        const formatted = flatten(value).trim();
+        if (formatted) {
+          const label = key
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, character => character.toUpperCase());
+
+          lines.push(`${label}:\n${formatted}`);
+        }
       }
 
-      return `${title}\n${sections.join("\n\n")}`;
-    }).join("\n\n--------------------\n\n");
+      return `${title}\n\n${lines.join("\n\n")}`;
+    }).join("\n\n━━━━━━━━━━━━━━━━━━━━\n\n");
+
+    return Promise.resolve(answer);
   }
-});
+
+  window.BusinessLocalAIReady = Promise.resolve({
+    ask
+  });
+})();
