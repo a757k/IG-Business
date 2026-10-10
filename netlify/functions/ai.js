@@ -1,437 +1,522 @@
 
+const STOP_WORDS = new Set([
+  "a", "an", "the", "is", "are", "was", "were", "be", "been", "being",
+  "do", "does", "did", "has", "have", "had", "can", "could", "would",
+  "should", "will", "may", "might", "of", "to", "in", "on", "at", "by",
+  "for", "from", "with", "about", "into", "than", "then", "that", "this",
+  "these", "those", "it", "its", "they", "them", "their", "he", "she",
+  "we", "you", "your", "i", "me", "my", "and", "or", "but", "if", "as",
+  "what", "which", "who", "when", "where", "why", "how", "explain",
+  "describe", "tell", "give", "show", "please", "business", "businesses"
+]);
+
+const ALIASES = {
+  "boston matrix": [
+    "boston matrix", "bcg matrix", "growth share matrix",
+    "star", "stars", "cash cow", "cash cows",
+    "question mark", "question marks", "dog", "dogs",
+    "market growth", "market share"
+  ],
+  "marketing mix": [
+    "marketing mix", "4ps", "product price place promotion"
+  ],
+  "break even": [
+    "break even", "break-even", "break even point",
+    "contribution", "fixed costs", "variable costs"
+  ],
+  "cash flow": [
+    "cash flow", "cash inflow", "cash outflow",
+    "cash flow forecast", "liquidity"
+  ],
+  "working capital": [
+    "working capital", "current assets", "current liabilities"
+  ],
+  "motivation": [
+    "motivation", "motivating employees", "financial rewards",
+    "non-financial rewards", "job satisfaction"
+  ],
+  "market segmentation": [
+    "market segmentation", "target market", "demographic",
+    "geographic", "psychographic"
+  ],
+  "economies of scale": [
+    "economies of scale", "diseconomies of scale",
+    "average costs", "bulk buying"
+  ],
+  "sources of finance": [
+    "sources of finance", "retained profit", "bank loan",
+    "overdraft", "share capital", "trade credit"
+  ],
+  "recruitment": [
+    "recruitment", "selection", "job description",
+    "person specification", "internal recruitment",
+    "external recruitment"
+  ],
+  "market research": [
+    "market research", "primary research", "secondary research",
+    "qualitative", "quantitative", "sample"
+  ],
+  "business objectives": [
+    "business objectives", "profit maximisation", "survival",
+    "growth", "market share", "social objectives"
+  ],
+  "stakeholders": [
+    "stakeholders", "owners", "employees", "customers",
+    "suppliers", "government", "local community"
+  ],
+  "cash flow forecast": [
+    "cash flow forecast", "opening balance", "closing balance",
+    "net cash flow", "cash inflows", "cash outflows"
+  ],
+  "income statement": [
+    "income statement", "revenue", "cost of sales",
+    "gross profit", "operating profit", "net profit"
+  ],
+  "marketing": [
+    "marketing", "market research", "marketing mix",
+    "promotion", "pricing", "distribution"
+  ],
+  "motivation theories": [
+    "maslow", "taylor", "hierarchy of needs",
+    "piece rate", "time rate"
+  ]
+};
+
+function reply(statusCode, data) {
+  return {
+    statusCode,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store"
+    },
+    body: JSON.stringify(data)
+  };
+}
+
+function cleanText(value) {
+  return String(value ?? "")
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalise(value) {
+  return cleanText(value)
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/break\s*-\s*even/g, "break even")
+    .replace(/[^a-z0-9.%£$+-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function words(value) {
+  return normalise(value)
+    .split(" ")
+    .filter(word =>
+      word.length > 1 &&
+      !STOP_WORDS.has(word) &&
+      !/^\d+$/.test(word)
+    );
+}
+
+function unique(values) {
+  return [...new Set(values)];
+}
+
+function collectDocuments(input) {
+  const documents = [];
+  const visited = new WeakSet();
+  let count = 0;
+
+  function walk(value, path, depth) {
+    if (value == null || depth > 12 || count > 2500) return;
+
+    if (typeof value === "string" || typeof value === "number") {
+      const text = cleanText(value);
+      if (text.length >= 20 && text.length <= 20000) {
+        documents.push({
+          title: path || "Business course content",
+          text,
+          source: path || "Course content"
+        });
+        count++;
+      }
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      value.forEach((item, index) =>
+        walk(item, path ? `${path} ${index + 1}` : "", depth + 1)
+      );
+      return;
+    }
+
+    if (typeof value !== "object" || visited.has(value)) return;
+    visited.add(value);
+
+    const preferredTitle =
+      value.title ||
+      value.heading ||
+      value.name ||
+      value.topic ||
+      value.label ||
+      value.question ||
+      "";
+
+    const nextPath = preferredTitle
+      ? cleanText(preferredTitle).slice(0, 140)
+      : path;
+
+    for (const [key, child] of Object.entries(value)) {
+      if (
+        key === "id" ||
+        key === "image" ||
+        key === "icon" ||
+        key === "url" ||
+        key === "href"
+      ) continue;
+
+      walk(child, nextPath || key, depth + 1);
+    }
+  }
+
+  walk(input, "", 0);
+
+  // Split large pieces of lesson content into smaller answer-sized pieces.
+  const chunks = [];
+
+  for (const doc of documents) {
+    const sentences = doc.text
+      .split(/(?<=[.!?])\s+|\n+/)
+      .map(cleanText)
+      .filter(sentence => sentence.length >= 18);
+
+    if (sentences.length <= 1) {
+      chunks.push(doc);
+      continue;
+    }
+
+    let group = [];
+
+    for (const sentence of sentences) {
+      if (
+        group.length &&
+        group.join(" ").length + sentence.length > 650
+      ) {
+        chunks.push({
+          ...doc,
+          text: group.join(" ")
+        });
+        group = [];
+      }
+
+      group.push(sentence);
+    }
+
+    if (group.length) {
+      chunks.push({
+        ...doc,
+        text: group.join(" ")
+      });
+    }
+  }
+
+  // Remove duplicate passages.
+  const seen = new Set();
+
+  return chunks.filter(doc => {
+    const key = normalise(doc.text);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function findConcept(question) {
+  const q = normalise(question);
+
+  // Match longer and more specific concepts first.
+  const concepts = Object.entries(ALIASES)
+    .sort((a, b) => b[0].length - a[0].length);
+
+  for (const [concept, phrases] of concepts) {
+    if (
+      q.includes(normalise(concept)) ||
+      phrases.some(phrase => q.includes(normalise(phrase)))
+    ) {
+      return { concept, phrases };
+    }
+  }
+
+  return null;
+}
+
+function scoreDocument(doc, question, queryWords, concept) {
+  const text = normalise(doc.text);
+  const title = normalise(doc.title);
+  let score = 0;
+
+  for (const word of queryWords) {
+    if (title.includes(word)) score += 7;
+    if (text.includes(word)) score += 2;
+
+    // Give a small extra reward for exact whole-word matches.
+    const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (new RegExp(`\\b${escaped}\\b`).test(text)) score += 1;
+  }
+
+  const q = normalise(question);
+
+  if (q.length >= 4 && text.includes(q)) score += 15;
+  if (title && q.includes(title) && title.length > 3) score += 12;
+
+  if (concept) {
+    const matchedPhrases = concept.phrases.filter(phrase =>
+      text.includes(normalise(phrase))
+    );
+
+    score += matchedPhrases.length * 4;
+
+    if (text.includes(normalise(concept.concept))) score += 12;
+  }
+
+  return score;
+}
+
+function getQuestionType(question) {
+  const q = normalise(question);
+
+  if (/^(what is|define|meaning of|what does .* mean)/.test(q)) {
+    return "definition";
+  }
+
+  if (/^(why|give a reason|state a reason)/.test(q)) {
+    return "why";
+  }
+
+  if (/^(how|in what way)/.test(q)) {
+    return "how";
+  }
+
+  if (/^(compare|difference between|distinguish)/.test(q)) {
+    return "compare";
+  }
+
+  if (/^(calculate|work out|find the|how much|what is the .* percentage)/.test(q)) {
+    return "calculation";
+  }
+
+  if (/^(evaluate|assess|to what extent|discuss)/.test(q)) {
+    return "evaluate";
+  }
+
+  if (/^(give|name|identify|state|list)/.test(q)) {
+    return "short";
+  }
+
+  return "general";
+}
+
+function selectUsefulSentences(documents, question, queryWords, concept, type) {
+  const candidates = [];
+
+  for (const doc of documents) {
+    const sentences = doc.text
+      .split(/(?<=[.!?])\s+|\n+/)
+      .map(cleanText)
+      .filter(sentence => sentence.length >= 18 && sentence.length <= 420);
+
+    for (const sentence of sentences) {
+      const score = scoreDocument(
+        { ...doc, text: sentence },
+        question,
+        queryWords,
+        concept
+      );
+
+      if (score > 0) {
+        candidates.push({
+          text: sentence,
+          score,
+          title: doc.title
+        });
+      }
+    }
+  }
+
+  candidates.sort((a, b) => b.score - a.score);
+
+  const selected = [];
+  const seen = new Set();
+
+  for (const candidate of candidates) {
+    const key = normalise(candidate.text);
+
+    if (seen.has(key)) continue;
+
+    // Don't include passages that are only loosely related.
+    if (candidate.score < (concept ? 5 : 4)) continue;
+
+    // Limit how much material is returned to the student.
+    if (selected.length >= (type === "evaluate" ? 4 : 3)) break;
+
+    // Avoid repeating almost identical content.
+    const candidateWords = new Set(words(candidate.text));
+    const duplicate = selected.some(item => {
+      const existingWords = new Set(words(item.text));
+      if (!candidateWords.size || !existingWords.size) return false;
+
+      let overlap = 0;
+      for (const word of candidateWords) {
+        if (existingWords.has(word)) overlap++;
+      }
+
+      return overlap / Math.min(candidateWords.size, existingWords.size) > 0.8;
+    });
+
+    if (duplicate) continue;
+
+    selected.push(candidate);
+    seen.add(key);
+  }
+
+  return selected;
+}
+
+function makeAnswer(question, selected, type, concept) {
+  if (!selected.length) {
+    const topic = concept ? concept.concept : "this question";
+
+    return (
+      `I couldn't find enough relevant information about ${topic} in the ` +
+      `Business content currently loaded on this website. I don't want to ` +
+      `guess and teach you something incorrect. Try using the topic's exact ` +
+      `name or check whether the relevant lesson has been added.`
+    );
+  }
+
+  const sentences = selected.map(item => item.text);
+  const q = normalise(question);
+
+  // Return the requested information rather than a whole lesson.
+  if (type === "definition" || type === "short") {
+    return sentences.slice(0, 2).join(" ");
+  }
+
+  if (type === "why" || type === "how") {
+    // Prefer a direct explanation, reason, consequence, or example.
+    const causal = sentences.filter(sentence =>
+      /\b(because|therefore|so that|this means|as a result|allows|helps|leads to|enables|reduces|increases|improves|prevents|results in)\b/i
+        .test(sentence)
+    );
+
+    const chosen = unique([...causal, ...sentences]).slice(0, 3);
+    return chosen.join(" ");
+  }
+
+  if (type === "compare") {
+    return sentences.slice(0, 3).join(" ");
+  }
+
+  if (type === "calculation") {
+    return sentences.slice(0, 3).join(" ");
+  }
+
+  if (type === "evaluate") {
+    const answer = sentences.slice(0, 4).join(" ");
+    return `${answer}\n\nFor an evaluation, use the evidence above to explain the likely impact on the business, then make a justified conclusion based on the situation in the question.`;
+  }
+
+  // If the source is long, keep the response concise.
+  return sentences.slice(0, 3).join(" ");
+}
+
 exports.handler = async (event) => {
-  if (event.httpMethod !== 'POST') {
-    return reply(405, { error: 'Method not allowed.' });
+  if (event.httpMethod !== "POST") {
+    return reply(405, { error: "Method not allowed." });
   }
 
   let body;
 
   try {
-    body = JSON.parse(event.body || '{}');
+    body = JSON.parse(event.body || "{}");
   } catch {
-    return reply(400, { error: 'Invalid request body.' });
+    return reply(400, { error: "Please send a valid question." });
   }
 
-  const question = typeof body.question === 'string'
-    ? body.question.trim()
-    : '';
-
-  const selectedTopic = typeof body.topic === 'string'
-    ? body.topic.slice(0, 120)
-    : '';
-
-  const topics = Array.isArray(body.topics)
-    ? body.topics.slice(0, 1000)
-    : [];
-
-  const quizzes = Array.isArray(body.quizQuestions)
-    ? body.quizQuestions.slice(0, 3000)
-    : [];
+  const question = cleanText(body.question).slice(0, 1000);
+  const topic = cleanText(body.topic).slice(0, 200);
 
   if (!question) {
-    return reply(400, { error: 'Please enter a question.' });
+    return reply(400, { error: "Type a question first." });
   }
 
-  if (question.length > 2000) {
-    return reply(400, {
-      error: 'Please keep your question under 2,000 characters.'
-    });
-  }
-
-  if (!topics.length && !quizzes.length) {
-    return reply(200, {
-      answer: 'No Business learning content was received. Refresh the website and try again.'
-    });
-  }
-
-  try {
-    const stopWords = new Set([
-      'the', 'a', 'an', 'is', 'are', 'was', 'were',
-      'what', 'why', 'how', 'when', 'where', 'who',
-      'does', 'do', 'did', 'can', 'could', 'would',
-      'should', 'explain', 'tell', 'me', 'about',
-      'please', 'and', 'or', 'to', 'of', 'in',
-      'for', 'with', 'on', 'it', 'this', 'that',
-      'be', 'as', 'by', 'give', 'some', 'business',
-      'igcse', 'edexcel', 'international', 'gcse',
-      'define', 'definition', 'describe', 'mean',
-      'means', 'meaning', 'example', 'examples',
-      'tell', 'difference', 'between', 'use',
-      'used', 'uses', 'works', 'work', 'matrix'
-    ]);
-
-    function norm(value) {
-      return String(value ?? '')
-        .toLowerCase()
-        .replace(/&/g, ' and ')
-        .replace(/[^a-z0-9%£$.-]+/g, ' ')
-        .trim()
-        .replace(/\s+/g, ' ');
-    }
-
-    function words(value) {
-      return norm(value)
-        .split(' ')
-        .filter(w => w.length > 1 && !stopWords.has(w));
-    }
-
-    function str(value, limit = 2500) {
-      return typeof value === 'string'
-        ? value.trim().slice(0, limit)
-        : '';
-    }
-
-    function flatten(value, depth = 0) {
-      if (depth > 7 || value == null) return [];
-
-      if (typeof value === 'string' ||
-          typeof value === 'number') {
-        return [String(value)];
-      }
-
-      if (Array.isArray(value)) {
-        return value.slice(0, 300).flatMap(v =>
-          flatten(v, depth + 1)
-        );
-      }
-
-      if (typeof value === 'object') {
-        return Object.values(value).slice(0, 150).flatMap(v =>
-          flatten(v, depth + 1)
-        );
-      }
-
-      return [];
-    }
-
-    // Recognise some common Business terms and their wording.
-    // Add further aliases here as the syllabus content grows.
-    const aliases = [
-      {
-        terms: ['boston matrix', 'bcg matrix', 'growth share matrix'],
-        words: ['boston', 'bcg', 'growth share']
-      },
-      {
-        terms: ['cash flow forecast', 'cash flow forecasting'],
-        words: ['cash flow forecast']
-      },
-      {
-        terms: ['break even', 'break-even analysis'],
-        words: ['break even']
-      },
-      {
-        terms: ['market segmentation'],
-        words: ['market segmentation']
-      },
-      {
-        terms: ['market research'],
-        words: ['market research']
-      },
-      {
-        terms: ['marketing mix'],
-        words: ['marketing mix', '4ps']
-      },
-      {
-        terms: ['profit margin'],
-        words: ['profit margin']
-      },
-      {
-        terms: ['working capital'],
-        words: ['working capital']
-      },
-      {
-        terms: ['economies of scale'],
-        words: ['economies of scale']
-      },
-      {
-        terms: ['diseconomies of scale'],
-        words: ['diseconomies of scale']
-      },
-      {
-        terms: ['price elasticity of demand'],
-        words: ['price elasticity of demand']
-      },
-      {
-        terms: ['market share'],
-        words: ['market share']
-      },
-      {
-        terms: ['added value'],
-        words: ['added value']
-      }
-    ];
-
-    const normalQuestion = norm(question);
-
-    const matchedAlias = aliases.find(group =>
-      group.terms.some(term =>
-        normalQuestion.includes(norm(term))
-      )
-    );
-
-    // If a distinctive Business term is explicitly requested,
-    // require a result that actually contains that term or alias.
-    const distinctiveTerms = matchedAlias
-      ? matchedAlias.words.map(norm)
-      : [];
-
-    const questionWords = words(question);
-
-    const ranked = topics.map(topic => {
-      if (!topic || typeof topic !== 'object') return null;
-
-      const title = str(topic.title || topic.name, 250);
-      const definition = str(topic.definition);
-      const summary = str(topic.summary || topic.description);
-      const example = str(topic.example);
-      const examTip = str(topic.examTip);
-
-      const pointText = Array.isArray(topic.points)
-        ? topic.points.map(point => {
-            if (Array.isArray(point)) return point.join(' ');
-
-            if (point && typeof point === 'object') {
-              return [
-                point.title,
-                point.name,
-                point.explanation,
-                point.description
-              ].join(' ');
-            }
-
-            return String(point ?? '');
-          }).join(' ')
-        : '';
-
-      const questionText = str(topic.question);
-      const answerText = str(topic.answer);
-
-      const titleNorm = norm(title);
-      const definitionNorm = norm(definition);
-      const summaryNorm = norm(summary);
-
-      const fields = {
-        title: titleNorm,
-        definition: definitionNorm,
-        summary: summaryNorm,
-        points: norm(pointText),
-        example: norm(example),
-        examTip: norm(examTip),
-        question: norm(questionText),
-        answer: norm(answerText)
-      };
-
-      const fullText = Object.values(fields).join(' ');
-      let score = 0;
-
-      // Exact phrases are much stronger evidence than single words.
-      if (
-        normalQuestion.length > 2 &&
-        titleNorm.includes(normalQuestion)
-      ) {
-        score += 100;
-      }
-
-      if (
-        normalQuestion.length > 2 &&
-        definitionNorm.includes(normalQuestion)
-      ) {
-        score += 50;
-      }
-
-      if (matchedAlias) {
-        const termFoundInTitle = distinctiveTerms.some(term =>
-          titleNorm.includes(term)
-        );
-
-        const termFoundInContent = distinctiveTerms.some(term =>
-          fullText.includes(term)
-        );
-
-        if (termFoundInTitle) score += 100;
-        else if (termFoundInContent) score += 45;
-        else score -= 100;
-      }
-
-      for (const word of questionWords) {
-        if (titleNorm.includes(word)) score += 8;
-        if (definitionNorm.includes(word)) score += 5;
-        if (summaryNorm.includes(word)) score += 3;
-        if (fields.points.includes(word)) score += 2;
-        if (fields.example.includes(word)) score += 1;
-        if (fields.examTip.includes(word)) score += 1;
-      }
-
-      if (
-        selectedTopic &&
-        titleNorm.includes(norm(selectedTopic))
-      ) {
-        score += 3;
-      }
-
-      return {
-        topic,
-        title,
-        definition,
-        summary,
-        example,
-        examTip,
-        pointText,
-        questionText,
-        answerText,
-        fullText,
-        score,
-        titleNorm
-      };
-    }).filter(Boolean).sort((a, b) => b.score - a.score);
-
-    // Search the quiz bank only when it contains a meaningful match.
-    const rankedQuizzes = quizzes.map(item => {
-      if (!item || typeof item !== 'object') return null;
-
-      const text = norm(flatten(item).join(' '));
-      const matches = questionWords.filter(word =>
-        text.includes(word)
-      ).length;
-
-      const exactAliasMatch = matchedAlias &&
-        distinctiveTerms.some(term => text.includes(term));
-
-      return {
-        item,
-        text,
-        score: matches + (exactAliasMatch ? 15 : 0),
-        exactAliasMatch: Boolean(exactAliasMatch)
-      };
-    }).filter(Boolean).filter(item => item.score > 0)
-      .sort((a, b) => b.score - a.score);
-
-    let candidates = ranked.filter(item => item.score > 0);
-
-    if (matchedAlias) {
-      candidates = candidates.filter(item =>
-        distinctiveTerms.some(term =>
-          item.fullText.includes(term)
-        )
-      );
-    }
-
-    // Do not pretend that an unrelated topic answers the question.
-    if (!candidates.length || candidates[0].score < 5) {
-      return reply(200, {
-        answer:
-          'I could not find a sufficiently relevant answer in the Business content currently loaded on this website.\n\n' +
-          'I do not want to give you incorrect information by using an unrelated topic. The notes may not yet include this concept. Try checking the relevant syllabus section or adding the missing topic to the website content.'
-      });
-    }
-
-    const selected = candidates.slice(0, 3);
-
-    const output = [
-      'Relevant information found in your Business learning materials:'
-    ];
-
-    for (const result of selected) {
-      const topic = result.topic;
-      const lines = [`TOPIC: ${result.title || 'Business topic'}`];
-
-      if (result.definition) {
-        lines.push(`Definition: ${result.definition}`);
-      }
-
-      if (result.summary) {
-        lines.push(`Overview: ${result.summary}`);
-      }
-
-      if (Array.isArray(topic.points) && topic.points.length) {
-        const points = topic.points.map(point => {
-          if (Array.isArray(point)) {
-            return `${str(point[0], 300)}: ${str(point[1], 1500)}`;
-          }
-
-          if (point && typeof point === 'object') {
-            const heading = str(point.title || point.name, 300);
-            const detail = str(
-              point.explanation || point.description,
-              1500
-            );
-
-            return heading ? `${heading}: ${detail}` : detail;
-          }
-
-          return str(point, 1500);
-        }).filter(Boolean);
-
-        if (points.length) {
-          lines.push('Key points:\n- ' + points.join('\n- '));
-        }
-      }
-
-      if (result.example) {
-        lines.push(`Business example: ${result.example}`);
-      }
-
-      if (result.examTip) {
-        lines.push(`Exam technique: ${result.examTip}`);
-      }
-
-      if (result.questionText) {
-        lines.push(`Practice question: ${result.questionText}`);
-      }
-
-      if (result.answerText) {
-        lines.push(`Sample answer: ${result.answerText}`);
-      }
-
-      output.push(lines.join('\n'));
-    }
-
-    const relevantQuizzes = rankedQuizzes.filter(result => {
-      if (matchedAlias) return result.exactAliasMatch;
-
-      // Require at least two question keywords to match a quiz.
-      return questionWords.filter(word =>
-        result.text.includes(word)
-      ).length >= 2;
-    }).slice(0, 2);
-
-    if (relevantQuizzes.length) {
-      output.push(
-        'RELATED PRACTICE QUESTIONS\n' +
-        relevantQuizzes.map(({ item }) => {
-          const q = str(item.q || item.question, 1000);
-          const explanation = str(item.explanation, 1500);
-
-          return [
-            q ? `Question: ${q}` : '',
-            explanation ? `Explanation: ${explanation}` : ''
-          ].filter(Boolean).join('\n');
-        }).join('\n\n')
-      );
-    }
-
-    output.push(
-      'This tutor searches existing website content; it does not generate new explanations. Check the relevant syllabus notes if the information you need is missing.'
-    );
-
-    return reply(200, { answer: output.join('\n\n---\n\n') });
-
-  } catch (error) {
-    console.error('Business content search failed:', error);
-
-    return reply(500, {
-      error: 'The Business content search failed. Please try again.'
-    });
-  }
-};
-
-function reply(statusCode, body) {
-  return {
-    statusCode,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store'
-    },
-    body: JSON.stringify(body)
+  // Only search content supplied by the website.
+  const websiteContent = {
+    topics: Array.isArray(body.topics) ? body.topics : [],
+    quizQuestions: Array.isArray(body.quizQuestions)
+      ? body.quizQuestions
+      : []
   };
-}
+
+  const documents = collectDocuments(websiteContent);
+
+  if (!documents.length) {
+    return reply(200, {
+      answer:
+        "I couldn't access any Business lesson content in this request. " +
+        "Check that your website is sending BUSINESS_TOPICS and BUSINESS_QUIZ " +
+        "to the tutor."
+    });
+  }
+
+  const concept = findConcept(question);
+  const queryWords = unique([
+    ...words(question),
+    ...words(topic)
+  ]);
+
+  // Search all content, then use the best matching passages only.
+  const ranked = documents
+    .map(doc => ({
+      ...doc,
+      score: scoreDocument(doc, question, queryWords, concept)
+    }))
+    .sort((a, b) => b.score - a.score);
+
+  const bestScore = ranked[0]?.score || 0;
+
+  // Don't confidently answer a question using unrelated lesson material.
+  if (bestScore < 4) {
+    return reply(200, {
+      answer:
+        "I couldn't find a close match for that question in the Business " +
+        "content on this website. Try including the exact topic or key term " +
+        "from your lesson, or check whether that content has been added."
+    });
+  }
+
+  const type = getQuestionType(question);
+  const selected = selectUsefulSentences(
+    documents,
+    question,
+    queryWords,
+    concept,
+    type
+  );
+
+  const answer = makeAnswer(question, selected, type, concept);
+
+  return reply(200, {
+    answer,
+    topic: concept?.concept || topic || "Business",
+    sources: unique(selected.map(item => item.title)).slice(0, 3)
+  });
+};
