@@ -12,28 +12,24 @@ exports.handler = async (event) => {
     return reply(400, { error: 'Invalid request body.' });
   }
 
-  const question =
-    typeof body.question === 'string'
-      ? body.question.trim()
-      : '';
+  const question = typeof body.question === 'string'
+    ? body.question.trim()
+    : '';
 
-  const selectedTopic =
-    typeof body.topic === 'string'
-      ? body.topic.slice(0, 120)
-      : '';
+  const selectedTopic = typeof body.topic === 'string'
+    ? body.topic.slice(0, 120)
+    : '';
 
   const topics = Array.isArray(body.topics)
     ? body.topics.slice(0, 1000)
     : [];
 
-  const quizQuestions = Array.isArray(body.quizQuestions)
+  const quizzes = Array.isArray(body.quizQuestions)
     ? body.quizQuestions.slice(0, 3000)
     : [];
 
   if (!question) {
-    return reply(400, {
-      error: 'Please enter a question.'
-    });
+    return reply(400, { error: 'Please enter a question.' });
   }
 
   if (question.length > 2000) {
@@ -42,9 +38,9 @@ exports.handler = async (event) => {
     });
   }
 
-  if (!topics.length && !quizQuestions.length) {
-    return reply(400, {
-      error: 'No Business learning content was received. Refresh the website and try again.'
+  if (!topics.length && !quizzes.length) {
+    return reply(200, {
+      answer: 'No Business learning content was received. Refresh the website and try again.'
     });
   }
 
@@ -57,42 +53,36 @@ exports.handler = async (event) => {
       'please', 'and', 'or', 'to', 'of', 'in',
       'for', 'with', 'on', 'it', 'this', 'that',
       'be', 'as', 'by', 'give', 'some', 'business',
-      'igcse', 'define', 'definition', 'describe',
-      'mean', 'means', 'meaning', 'example', 'examples',
-      'edexcel', 'international', 'gcse'
+      'igcse', 'edexcel', 'international', 'gcse',
+      'define', 'definition', 'describe', 'mean',
+      'means', 'meaning', 'example', 'examples',
+      'tell', 'difference', 'between', 'use',
+      'used', 'uses', 'works', 'work', 'matrix'
     ]);
 
-    function normalise(value) {
+    function norm(value) {
       return String(value ?? '')
         .toLowerCase()
+        .replace(/&/g, ' and ')
         .replace(/[^a-z0-9%£$.-]+/g, ' ')
-        .trim();
+        .trim()
+        .replace(/\s+/g, ' ');
     }
 
-    function wordsOf(value) {
-      return normalise(value)
-        .split(/\s+/)
-        .filter(word =>
-          word.length > 1 && !stopWords.has(word)
-        );
+    function words(value) {
+      return norm(value)
+        .split(' ')
+        .filter(w => w.length > 1 && !stopWords.has(w));
     }
 
-    function clean(value, maxLength = 3000) {
-      if (typeof value === 'string') {
-        return value.slice(0, maxLength).trim();
-      }
-
-      if (typeof value === 'number') {
-        return String(value);
-      }
-
-      return '';
+    function str(value, limit = 2500) {
+      return typeof value === 'string'
+        ? value.trim().slice(0, limit)
+        : '';
     }
 
-    // Collect text from every string field, including fields
-    // added to the learning content in the future.
-    function extractText(value, depth = 0) {
-      if (depth > 8 || value == null) return [];
+    function flatten(value, depth = 0) {
+      if (depth > 7 || value == null) return [];
 
       if (typeof value === 'string' ||
           typeof value === 'number') {
@@ -100,74 +90,183 @@ exports.handler = async (event) => {
       }
 
       if (Array.isArray(value)) {
-        return value.slice(0, 500).flatMap(item =>
-          extractText(item, depth + 1)
+        return value.slice(0, 300).flatMap(v =>
+          flatten(v, depth + 1)
         );
       }
 
       if (typeof value === 'object') {
-        return Object.values(value).slice(0, 200).flatMap(item =>
-          extractText(item, depth + 1)
+        return Object.values(value).slice(0, 150).flatMap(v =>
+          flatten(v, depth + 1)
         );
       }
 
       return [];
     }
 
-    const questionWords = wordsOf(question);
-    const phrase = normalise(question);
-
-    if (!questionWords.length) {
-      return reply(200, {
-        answer:
-          'Please ask a specific question about Edexcel International GCSE Business, such as a definition, calculation, business concept or exam technique.'
-      });
-    }
-
-    // Give more weight to the title and the key definition,
-    // while also searching every other field in each topic.
-    const rankedTopics = topics.map(topic => {
-      if (!topic || typeof topic !== 'object') {
-        return null;
+    // Recognise some common Business terms and their wording.
+    // Add further aliases here as the syllabus content grows.
+    const aliases = [
+      {
+        terms: ['boston matrix', 'bcg matrix', 'growth share matrix'],
+        words: ['boston', 'bcg', 'growth share']
+      },
+      {
+        terms: ['cash flow forecast', 'cash flow forecasting'],
+        words: ['cash flow forecast']
+      },
+      {
+        terms: ['break even', 'break-even analysis'],
+        words: ['break even']
+      },
+      {
+        terms: ['market segmentation'],
+        words: ['market segmentation']
+      },
+      {
+        terms: ['market research'],
+        words: ['market research']
+      },
+      {
+        terms: ['marketing mix'],
+        words: ['marketing mix', '4ps']
+      },
+      {
+        terms: ['profit margin'],
+        words: ['profit margin']
+      },
+      {
+        terms: ['working capital'],
+        words: ['working capital']
+      },
+      {
+        terms: ['economies of scale'],
+        words: ['economies of scale']
+      },
+      {
+        terms: ['diseconomies of scale'],
+        words: ['diseconomies of scale']
+      },
+      {
+        terms: ['price elasticity of demand'],
+        words: ['price elasticity of demand']
+      },
+      {
+        terms: ['market share'],
+        words: ['market share']
+      },
+      {
+        terms: ['added value'],
+        words: ['added value']
       }
+    ];
 
-      const title = clean(topic.title || topic.name, 250);
-      const definition = clean(topic.definition, 2000);
-      const summary = clean(
-        topic.summary || topic.description,
-        2000
-      );
+    const normalQuestion = norm(question);
 
-      const example = clean(topic.example, 2000);
-      const examTip = clean(topic.examTip, 2000);
-      const allText = normalise(extractText(topic).join(' '));
+    const matchedAlias = aliases.find(group =>
+      group.terms.some(term =>
+        normalQuestion.includes(norm(term))
+      )
+    );
 
+    // If a distinctive Business term is explicitly requested,
+    // require a result that actually contains that term or alias.
+    const distinctiveTerms = matchedAlias
+      ? matchedAlias.words.map(norm)
+      : [];
+
+    const questionWords = words(question);
+
+    const ranked = topics.map(topic => {
+      if (!topic || typeof topic !== 'object') return null;
+
+      const title = str(topic.title || topic.name, 250);
+      const definition = str(topic.definition);
+      const summary = str(topic.summary || topic.description);
+      const example = str(topic.example);
+      const examTip = str(topic.examTip);
+
+      const pointText = Array.isArray(topic.points)
+        ? topic.points.map(point => {
+            if (Array.isArray(point)) return point.join(' ');
+
+            if (point && typeof point === 'object') {
+              return [
+                point.title,
+                point.name,
+                point.explanation,
+                point.description
+              ].join(' ');
+            }
+
+            return String(point ?? '');
+          }).join(' ')
+        : '';
+
+      const questionText = str(topic.question);
+      const answerText = str(topic.answer);
+
+      const titleNorm = norm(title);
+      const definitionNorm = norm(definition);
+      const summaryNorm = norm(summary);
+
+      const fields = {
+        title: titleNorm,
+        definition: definitionNorm,
+        summary: summaryNorm,
+        points: norm(pointText),
+        example: norm(example),
+        examTip: norm(examTip),
+        question: norm(questionText),
+        answer: norm(answerText)
+      };
+
+      const fullText = Object.values(fields).join(' ');
       let score = 0;
 
+      // Exact phrases are much stronger evidence than single words.
+      if (
+        normalQuestion.length > 2 &&
+        titleNorm.includes(normalQuestion)
+      ) {
+        score += 100;
+      }
+
+      if (
+        normalQuestion.length > 2 &&
+        definitionNorm.includes(normalQuestion)
+      ) {
+        score += 50;
+      }
+
+      if (matchedAlias) {
+        const termFoundInTitle = distinctiveTerms.some(term =>
+          titleNorm.includes(term)
+        );
+
+        const termFoundInContent = distinctiveTerms.some(term =>
+          fullText.includes(term)
+        );
+
+        if (termFoundInTitle) score += 100;
+        else if (termFoundInContent) score += 45;
+        else score -= 100;
+      }
+
       for (const word of questionWords) {
-        if (normalise(title).includes(word)) score += 8;
-        if (normalise(definition).includes(word)) score += 4;
-        if (normalise(summary).includes(word)) score += 3;
-        if (normalise(example).includes(word)) score += 2;
-        if (normalise(examTip).includes(word)) score += 2;
-
-        if (allText.includes(word)) score += 1;
+        if (titleNorm.includes(word)) score += 8;
+        if (definitionNorm.includes(word)) score += 5;
+        if (summaryNorm.includes(word)) score += 3;
+        if (fields.points.includes(word)) score += 2;
+        if (fields.example.includes(word)) score += 1;
+        if (fields.examTip.includes(word)) score += 1;
       }
 
-      const normalTitle = normalise(title);
-
-      if (phrase && normalTitle === phrase) {
-        score += 20;
-      } else if (phrase && normalTitle.includes(phrase)) {
-        score += 10;
-      }
-
-      // Small preference for the selected syllabus topic.
       if (
         selectedTopic &&
-        normalise(title).includes(normalise(selectedTopic))
+        titleNorm.includes(norm(selectedTopic))
       ) {
-        score += 2;
+        score += 3;
       }
 
       return {
@@ -177,59 +276,64 @@ exports.handler = async (event) => {
         summary,
         example,
         examTip,
+        pointText,
+        questionText,
+        answerText,
+        fullText,
         score,
-        allText
+        titleNorm
       };
-    }).filter(Boolean)
-      .sort((a, b) => b.score - a.score);
+    }).filter(Boolean).sort((a, b) => b.score - a.score);
 
-    const rankedQuizzes = quizQuestions.map(item => {
+    // Search the quiz bank only when it contains a meaningful match.
+    const rankedQuizzes = quizzes.map(item => {
       if (!item || typeof item !== 'object') return null;
 
-      const text = normalise(extractText(item).join(' '));
+      const text = norm(flatten(item).join(' '));
+      const matches = questionWords.filter(word =>
+        text.includes(word)
+      ).length;
 
-      const score = questionWords.reduce(
-        (total, word) =>
-          total + (text.includes(word) ? 1 : 0),
-        0
-      );
+      const exactAliasMatch = matchedAlias &&
+        distinctiveTerms.some(term => text.includes(term));
 
-      return { item, score };
-    }).filter(Boolean)
-      .filter(item => item.score > 0)
+      return {
+        item,
+        text,
+        score: matches + (exactAliasMatch ? 15 : 0),
+        exactAliasMatch: Boolean(exactAliasMatch)
+      };
+    }).filter(Boolean).filter(item => item.score > 0)
       .sort((a, b) => b.score - a.score);
 
-    const bestTopics = rankedTopics
-      .filter(item => item.score > 0)
-      .slice(0, 3);
+    let candidates = ranked.filter(item => item.score > 0);
 
-    const bestQuizzes = rankedQuizzes.slice(0, 2);
+    if (matchedAlias) {
+      candidates = candidates.filter(item =>
+        distinctiveTerms.some(term =>
+          item.fullText.includes(term)
+        )
+      );
+    }
 
-    const bestScore = bestTopics[0]?.score || 0;
-
-    // Do not invent an answer if the supplied notes contain
-    // no useful match.
-    if (!bestTopics.length || bestScore < 2) {
+    // Do not pretend that an unrelated topic answers the question.
+    if (!candidates.length || candidates[0].score < 5) {
       return reply(200, {
         answer:
-          'I could not find enough relevant information in the Business content currently loaded on this website to answer confidently.\n\n' +
-          'I can search the notes, definitions, examples, exam tips and practice questions that are available here. Try asking with the name of a syllabus topic or a key Business term.'
+          'I could not find a sufficiently relevant answer in the Business content currently loaded on this website.\n\n' +
+          'I do not want to give you incorrect information by using an unrelated topic. The notes may not yet include this concept. Try checking the relevant syllabus section or adding the missing topic to the website content.'
       });
     }
 
-    const answerParts = [];
+    const selected = candidates.slice(0, 3);
 
-    answerParts.push(
-      'I searched the Business learning materials on this website. Here is the most relevant information I found:\n'
-    );
+    const output = [
+      'Relevant information found in your Business learning materials:'
+    ];
 
-    for (const result of bestTopics) {
+    for (const result of selected) {
       const topic = result.topic;
-      const lines = [];
-
-      lines.push(
-        `TOPIC: ${result.title || 'Business topic'}`
-      );
+      const lines = [`TOPIC: ${result.title || 'Business topic'}`];
 
       if (result.definition) {
         lines.push(`Definition: ${result.definition}`);
@@ -239,41 +343,27 @@ exports.handler = async (event) => {
         lines.push(`Overview: ${result.summary}`);
       }
 
-      // Present learning points in a readable format.
       if (Array.isArray(topic.points) && topic.points.length) {
         const points = topic.points.map(point => {
           if (Array.isArray(point)) {
-            const heading = clean(point[0], 300);
-            const explanation = clean(point[1], 1500);
-
-            return heading
-              ? `${heading}: ${explanation}`
-              : explanation;
+            return `${str(point[0], 300)}: ${str(point[1], 1500)}`;
           }
 
           if (point && typeof point === 'object') {
-            const heading = clean(
-              point.title || point.name,
-              300
-            );
-
-            const explanation = clean(
+            const heading = str(point.title || point.name, 300);
+            const detail = str(
               point.explanation || point.description,
               1500
             );
 
-            return heading
-              ? `${heading}: ${explanation}`
-              : explanation;
+            return heading ? `${heading}: ${detail}` : detail;
           }
 
-          return clean(point, 1500);
+          return str(point, 1500);
         }).filter(Boolean);
 
         if (points.length) {
-          lines.push(
-            'Key learning points:\n- ' + points.join('\n- ')
-          );
+          lines.push('Key points:\n- ' + points.join('\n- '));
         }
       }
 
@@ -285,53 +375,52 @@ exports.handler = async (event) => {
         lines.push(`Exam technique: ${result.examTip}`);
       }
 
-      if (topic.question) {
-        lines.push(
-          `Practice question: ${clean(topic.question, 1000)}`
-        );
+      if (result.questionText) {
+        lines.push(`Practice question: ${result.questionText}`);
       }
 
-      if (topic.answer) {
-        lines.push(
-          `Sample answer: ${clean(topic.answer, 2000)}`
-        );
+      if (result.answerText) {
+        lines.push(`Sample answer: ${result.answerText}`);
       }
 
-      answerParts.push(lines.join('\n'));
+      output.push(lines.join('\n'));
     }
 
-    if (bestQuizzes.length) {
-      const quizText = bestQuizzes.map(({ item }) => {
-        const q = clean(item.q || item.question, 1000);
-        const explanation = clean(item.explanation, 2000);
+    const relevantQuizzes = rankedQuizzes.filter(result => {
+      if (matchedAlias) return result.exactAliasMatch;
 
-        return [
-          q ? `Question: ${q}` : '',
-          explanation ? `Explanation: ${explanation}` : ''
-        ].filter(Boolean).join('\n');
-      }).filter(Boolean);
+      // Require at least two question keywords to match a quiz.
+      return questionWords.filter(word =>
+        result.text.includes(word)
+      ).length >= 2;
+    }).slice(0, 2);
 
-      if (quizText.length) {
-        answerParts.push(
-          'RELATED PRACTICE QUESTIONS\n' +
-          quizText.join('\n\n')
-        );
-      }
+    if (relevantQuizzes.length) {
+      output.push(
+        'RELATED PRACTICE QUESTIONS\n' +
+        relevantQuizzes.map(({ item }) => {
+          const q = str(item.q || item.question, 1000);
+          const explanation = str(item.explanation, 1500);
+
+          return [
+            q ? `Question: ${q}` : '',
+            explanation ? `Explanation: ${explanation}` : ''
+          ].filter(Boolean).join('\n');
+        }).join('\n\n')
+      );
     }
 
-    answerParts.push(
-      'Note: This response retrieves and organises existing website content. It does not generate new knowledge, and the material shown may not cover every part of the question.'
+    output.push(
+      'This tutor searches existing website content; it does not generate new explanations. Check the relevant syllabus notes if the information you need is missing.'
     );
 
-    return reply(200, {
-      answer: answerParts.join('\n\n--------------------\n\n')
-    });
+    return reply(200, { answer: output.join('\n\n---\n\n') });
 
   } catch (error) {
     console.error('Business content search failed:', error);
 
     return reply(500, {
-      error: 'The Business content search failed. Please refresh the website and try again.'
+      error: 'The Business content search failed. Please try again.'
     });
   }
 };
