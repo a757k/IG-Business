@@ -1,39 +1,66 @@
-// Browser-based language model for the Edexcel IGCSE Business tutor.
-// No AI API key or paid inference service is used.
 
 const MODEL_ID = "Qwen2.5-1.5B-Instruct-q4f16_1-MLC";
-let enginePromise = null;
 
-function updateTutorButton(message) {
-  const button = document.querySelector("#askButton");
-  if (button) button.textContent = message;
+let enginePromise = null;
+let webllmPromise = null;
+
+function showProgress(text) {
+  window.dispatchEvent(
+    new CustomEvent("business-ai-progress", {
+      detail: { text }
+    })
+  );
+}
+
+async function getWebLLM() {
+  if (!webllmPromise) {
+    webllmPromise = import("https://esm.run/@mlc-ai/web-llm")
+      .catch((error) => {
+        webllmPromise = null;
+        throw new Error(
+          "Could not load the AI library. Check your internet connection and refresh the page."
+        );
+      });
+  }
+
+  return webllmPromise;
 }
 
 async function getLocalEngine() {
-  if (!navigator.gpu) {
+  if (!("gpu" in navigator)) {
     throw new Error(
-      "This browser/device does not support WebGPU. Try the latest Microsoft Edge or Google Chrome on a compatible device."
+      "Your browser or device does not support WebGPU, which this AI model needs. Try updating Microsoft Edge or Chrome."
     );
   }
 
   if (!enginePromise) {
     enginePromise = (async () => {
-      updateTutorButton("Loading AI library…");
-      const webllm = await import("https://esm.run/@mlc-ai/web-llm");
-      updateTutorButton("Downloading/preparing model…");
+      showProgress("Loading the AI library...");
 
-      return webllm.CreateMLCEngine(MODEL_ID, {
-        initProgressCallback(progress) {
-          if (progress?.text) {
-            const text = progress.text;
-            updateTutorButton(
-              text.length > 55 ? text.slice(0, 52) + "…" : text
-            );
-          }
+      const webllm = await getWebLLM();
+
+      if (!webllm.MLCEngine) {
+        throw new Error(
+          "The AI library did not initialize correctly. Please refresh the page."
+        );
+      }
+
+      // Create an engine and explicitly load the model before using it.
+      const engine = new webllm.MLCEngine();
+
+      await engine.reload(MODEL_ID, {
+        initProgressCallback: (progress) => {
+          const message =
+            progress?.text || "Preparing the AI model...";
+          showProgress(message);
         }
       });
-    })().catch(error => {
+
+      showProgress("AI model ready.");
+      return engine;
+    })().catch((error) => {
       enginePromise = null;
+      console.error("Business AI model loading failed:", error);
       throw error;
     });
   }
@@ -41,148 +68,131 @@ async function getLocalEngine() {
   return enginePromise;
 }
 
-function topicToText(topic) {
-  const values = [
-    topic.title,
-    topic.name,
-    topic.section,
-    topic.sectionName,
-    topic.sectionLabel,
-    topic.summary,
-    topic.description,
-    topic.definition,
-    topic.example,
-    topic.examTip,
-    topic.question,
-    topic.answer,
-    Array.isArray(topic.keywords)
-      ? topic.keywords.join(", ")
-      : topic.keywords
-  ];
-
-  if (Array.isArray(topic.points)) {
-    for (const point of topic.points) {
-      if (Array.isArray(point)) {
-        values.push(point.join(": "));
-      } else if (point && typeof point === "object") {
-        values.push(point.title || point.name || "");
-        values.push(point.explanation || point.description || "");
-      } else {
-        values.push(String(point ?? ""));
-      }
-    }
-  }
-
-  return values
-    .filter(Boolean)
-    .map(value => String(value))
-    .join("\n");
-}
-
-function findBusinessContext(question, selectedTopic) {
+function getRelevantBusinessContent(question, selectedTopic) {
   const topics = Array.isArray(window.BUSINESS_TOPICS)
-    ? window.BUSINESS_TOPICS.filter(Boolean)
+    ? window.BUSINESS_TOPICS
     : [];
 
-  if (!topics.length) {
-    throw new Error(
-      "The Business notes have not loaded. Check your content scripts in index.html."
-    );
-  }
+  const query = `${question} ${selectedTopic || ""}`.toLowerCase();
 
-  const ignored = new Set([
-    "the", "and", "for", "that", "this", "what", "why", "how", "does",
-    "can", "could", "would", "should", "explain", "describe", "define",
-    "give", "with", "about", "business", "igcse", "edexcel", "from", "into"
-  ]);
+  const words = query
+    .split(/[^a-z0-9]+/)
+    .filter((word) => word.length > 2);
 
-  const words = question
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, " ")
-    .split(/\s+/)
-    .filter(word => word.length > 2 && !ignored.has(word));
+  const ranked = topics.map((topic) => {
+    const searchable = [
+      topic.title,
+      topic.name,
+      topic.section,
+      topic.description,
+      topic.content,
+      topic.explanation,
+      topic.definition,
+      topic.examTechnique,
+      topic.keyTerms
+    ]
+      .flat()
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
 
-  const chosenTopic = String(selectedTopic || "").toLowerCase();
-
-  const ranked = topics.map(topic => {
-    const title = String(topic.title || topic.name || "");
-    const text = topicToText(topic);
-    const searchable = text.toLowerCase();
     let score = 0;
 
     for (const word of words) {
-      if (title.toLowerCase().includes(word)) {
-        score += 5;
-      } else if (searchable.includes(word)) {
+      if (searchable.includes(word)) {
         score += 1;
       }
     }
 
     if (
-      chosenTopic &&
-      chosenTopic !== "all" &&
-      chosenTopic !== "all topics"
+      selectedTopic &&
+      selectedTopic !== "All topics" &&
+      [topic.title, topic.name, topic.id].some(
+        (value) =>
+          value &&
+          String(value).toLowerCase() === selectedTopic.toLowerCase()
+      )
     ) {
-      const sectionInfo = [
-        topic.id,
-        topic.section,
-        topic.sectionName,
-        topic.sectionLabel,
-        title
-      ].join(" ").toLowerCase();
-
-      if (sectionInfo.includes(chosenTopic)) score += 8;
+      score += 10;
     }
 
-    return { title, text, score };
-  }).sort((a, b) => b.score - a.score);
+    return { topic, score, searchable };
+  });
 
-  const relevant = ranked
-    .filter(item => item.score > 0)
-    .slice(0, 6);
+  return ranked
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+    .map(({ topic }) => {
+      if (typeof topic.content === "string") {
+        return `${topic.title || topic.name || "Topic"}\n${topic.content}`;
+      }
 
-  const context = (relevant.length ? relevant : ranked.slice(0, 3))
-    .map(item => `TOPIC: ${item.title}\n${item.text}`)
-    .join("\n\n---\n\n");
-
-  return context.slice(0, 9000);
+      return JSON.stringify(topic);
+    })
+    .join("\n\n")
+    .slice(0, 9000);
 }
 
 window.BusinessLocalAIReady = Promise.resolve({
-  async ask(question, selectedTopic = "All topics") {
-    const engine = await getLocalEngine();
-    const notes = findBusinessContext(question, selectedTopic);
-
-    const result = await engine.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: `You are a helpful tutor for Pearson Edexcel International GCSE Business (4BS1).
-
-Use clear, student-friendly English. Focus on the Edexcel IGCSE Business syllabus and the supplied notes. Give realistic business examples where useful. For exam questions, develop points by explaining why they matter to the business; include application and evaluation when appropriate. For calculations, show the formula, substitution and answer. Do not invent official mark schemes or claim full marks are guaranteed. If the notes are insufficient, say so and distinguish general knowledge from the supplied notes. If a question is unrelated to Business, politely redirect the student to Business.
-
-Relevant website notes:
-${notes}`
-        },
-        {
-          role: "user",
-          content: question
-        }
-      ],
-      temperature: 0.3,
-      max_tokens: 600
-    });
-
-    const answer = result?.choices?.[0]?.message?.content?.trim();
-
-    if (!answer) {
-      throw new Error(
-        "The language model returned an empty answer. Please try again."
-      );
+  async ask(question, selectedTopic = "") {
+    if (!question || !question.trim()) {
+      throw new Error("Please enter a question first.");
     }
 
-    return answer;
+    // Do not send a completion request until the model has loaded.
+    showProgress("Checking that the AI model is ready...");
+    const engine = await getLocalEngine();
+
+    const businessContent = getRelevantBusinessContent(
+      question,
+      selectedTopic
+    );
+
+    const systemPrompt = `
+You are a helpful tutor for Pearson Edexcel International GCSE Business (4BS1).
+
+Teach at IGCSE level using clear, concise explanations.
+Define important business terms accurately.
+Use relevant business examples.
+When appropriate, explain chains of reasoning and the effect on a business.
+Give exam advice and use knowledge, application, analysis and evaluation where relevant.
+Do not invent quotations from the official specification or claim an answer is an official mark scheme.
+
+Use the supplied revision content when relevant. If it does not contain the answer, answer from your general knowledge of IGCSE Business and be honest about uncertainty.
+
+Relevant revision content:
+${businessContent || "No closely matching revision notes were found."}
+`;
+
+    showProgress("Writing your answer...");
+
+    try {
+      const result = await engine.chat.completions.create({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: question.trim() }
+        ],
+        temperature: 0.3,
+        max_tokens: 600
+      });
+
+      const answer = result?.choices?.[0]?.message?.content?.trim();
+
+      if (!answer) {
+        throw new Error(
+          "The AI did not return an answer. Please try asking again."
+        );
+      }
+
+      showProgress("Answer ready.");
+      return answer;
+    } catch (error) {
+      console.error("Business AI request failed:", error);
+      throw new Error(
+        error?.message ||
+          "The AI could not answer this question. Please try again."
+      );
+    }
   }
 });
-
-console.log("Local Business language model integration loaded.");
