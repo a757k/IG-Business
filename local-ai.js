@@ -1,198 +1,145 @@
 
+import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm@0.2.80";
+
 const MODEL_ID = "Qwen2.5-1.5B-Instruct-q4f16_1-MLC";
 
 let enginePromise = null;
-let webllmPromise = null;
 
-function showProgress(text) {
+function updateStatus(message) {
+  console.log("[Business AI]", message);
+
   window.dispatchEvent(
     new CustomEvent("business-ai-progress", {
-      detail: { text }
+      detail: { text: message }
     })
   );
 }
 
-async function getWebLLM() {
-  if (!webllmPromise) {
-    webllmPromise = import("https://esm.run/@mlc-ai/web-llm")
-      .catch((error) => {
-        webllmPromise = null;
-        throw new Error(
-          "Could not load the AI library. Check your internet connection and refresh the page."
-        );
-      });
-  }
-
-  return webllmPromise;
-}
-
-async function getLocalEngine() {
-  if (!("gpu" in navigator)) {
-    throw new Error(
-      "Your browser or device does not support WebGPU, which this AI model needs. Try updating Microsoft Edge or Chrome."
-    );
-  }
-
+function loadEngine() {
   if (!enginePromise) {
     enginePromise = (async () => {
-      showProgress("Loading the AI library...");
-
-      const webllm = await getWebLLM();
-
-      if (!webllm.MLCEngine) {
+      if (!("gpu" in navigator)) {
         throw new Error(
-          "The AI library did not initialize correctly. Please refresh the page."
+          "WebGPU is not supported in this browser. Update Microsoft Edge or Chrome."
         );
       }
 
-      // Create an engine and explicitly load the model before using it.
-      const engine = new webllm.MLCEngine();
+      updateStatus("Loading AI model. This may take several minutes...");
 
-      await engine.reload(MODEL_ID, {
+      const engine = await CreateMLCEngine(MODEL_ID, {
         initProgressCallback: (progress) => {
-          const message =
-            progress?.text || "Preparing the AI model...";
-          showProgress(message);
+          updateStatus(
+            progress?.text || "Downloading and loading AI model..."
+          );
         }
       });
 
-      showProgress("AI model ready.");
+      if (!engine?.chat?.completions?.create) {
+        throw new Error("The AI model did not initialize correctly.");
+      }
+
+      updateStatus("AI model loaded and ready.");
       return engine;
     })().catch((error) => {
       enginePromise = null;
-      console.error("Business AI model loading failed:", error);
-      throw error;
+      console.error("[Business AI] Model loading failed:", error);
+      throw new Error(
+        "The AI model could not load. Check your internet connection, refresh the page, and try again. Details: " +
+        (error?.message || String(error))
+      );
     });
   }
 
   return enginePromise;
 }
 
-function getRelevantBusinessContent(question, selectedTopic) {
+function getRevisionNotes() {
   const topics = Array.isArray(window.BUSINESS_TOPICS)
     ? window.BUSINESS_TOPICS
     : [];
 
-  const query = `${question} ${selectedTopic || ""}`.toLowerCase();
-
-  const words = query
-    .split(/[^a-z0-9]+/)
-    .filter((word) => word.length > 2);
-
-  const ranked = topics.map((topic) => {
-    const searchable = [
-      topic.title,
-      topic.name,
-      topic.section,
+  return topics.map((topic) => {
+    const title = topic.title || topic.name || "Business topic";
+    const details = [
+      topic.definition,
       topic.description,
       topic.content,
       topic.explanation,
-      topic.definition,
       topic.examTechnique,
       topic.keyTerms
     ]
       .flat()
       .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
+      .join("\n");
 
-    let score = 0;
-
-    for (const word of words) {
-      if (searchable.includes(word)) {
-        score += 1;
-      }
-    }
-
-    if (
-      selectedTopic &&
-      selectedTopic !== "All topics" &&
-      [topic.title, topic.name, topic.id].some(
-        (value) =>
-          value &&
-          String(value).toLowerCase() === selectedTopic.toLowerCase()
-      )
-    ) {
-      score += 10;
-    }
-
-    return { topic, score, searchable };
-  });
-
-  return ranked
-    .filter((item) => item.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5)
-    .map(({ topic }) => {
-      if (typeof topic.content === "string") {
-        return `${topic.title || topic.name || "Topic"}\n${topic.content}`;
-      }
-
-      return JSON.stringify(topic);
-    })
-    .join("\n\n")
-    .slice(0, 9000);
+    return `${title}\n${details}`;
+  }).join("\n\n").slice(0, 12000);
 }
 
-window.BusinessLocalAIReady = Promise.resolve({
-  async ask(question, selectedTopic = "") {
-    if (!question || !question.trim()) {
-      throw new Error("Please enter a question first.");
-    }
+async function ask(question, selectedTopic = "") {
+  if (typeof question !== "string" || !question.trim()) {
+    throw new Error("Please type a question first.");
+  }
 
-    // Do not send a completion request until the model has loaded.
-    showProgress("Checking that the AI model is ready...");
-    const engine = await getLocalEngine();
+  // Always wait for the model-loading promise before making a request.
+  const engine = await loadEngine();
 
-    const businessContent = getRelevantBusinessContent(
-      question,
-      selectedTopic
-    );
+  const notes = getRevisionNotes();
 
-    const systemPrompt = `
-You are a helpful tutor for Pearson Edexcel International GCSE Business (4BS1).
+  const systemMessage = `
+You are an IGCSE Business tutor for Pearson Edexcel International GCSE Business (4BS1).
 
-Teach at IGCSE level using clear, concise explanations.
-Define important business terms accurately.
-Use relevant business examples.
-When appropriate, explain chains of reasoning and the effect on a business.
-Give exam advice and use knowledge, application, analysis and evaluation where relevant.
-Do not invent quotations from the official specification or claim an answer is an official mark scheme.
+Explain concepts clearly at IGCSE level. Define business terms, use realistic examples, and explain cause-and-effect chains. For exam questions, help the student apply knowledge, analyse effects, and evaluate where appropriate. Do not claim that your answers are official mark schemes.
 
-Use the supplied revision content when relevant. If it does not contain the answer, answer from your general knowledge of IGCSE Business and be honest about uncertainty.
+Selected topic: ${selectedTopic || "All topics"}
 
-Relevant revision content:
-${businessContent || "No closely matching revision notes were found."}
+Revision notes:
+${notes || "No revision notes are available. Answer using your general IGCSE Business knowledge."}
 `;
 
-    showProgress("Writing your answer...");
+  updateStatus("Generating your answer...");
 
-    try {
-      const result = await engine.chat.completions.create({
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: question.trim() }
-        ],
-        temperature: 0.3,
-        max_tokens: 600
-      });
+  try {
+    const response = await engine.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: systemMessage
+        },
+        {
+          role: "user",
+          content: question.trim()
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 600
+    });
 
-      const answer = result?.choices?.[0]?.message?.content?.trim();
+    const answer = response?.choices?.[0]?.message?.content?.trim();
 
-      if (!answer) {
-        throw new Error(
-          "The AI did not return an answer. Please try asking again."
-        );
-      }
-
-      showProgress("Answer ready.");
-      return answer;
-    } catch (error) {
-      console.error("Business AI request failed:", error);
-      throw new Error(
-        error?.message ||
-          "The AI could not answer this question. Please try again."
-      );
+    if (!answer) {
+      throw new Error("The AI returned an empty answer. Please try again.");
     }
+
+    updateStatus("Answer ready.");
+    return answer;
+  } catch (error) {
+    console.error("[Business AI] Answer generation failed:", error);
+
+    throw new Error(
+      error?.message || "The AI could not answer. Please try again."
+    );
   }
+}
+
+// Keep the interface expected by app.js.
+window.BusinessLocalAIReady = Promise.resolve({
+  ask,
+  load: loadEngine
+});
+
+// Begin loading immediately, but report failures without creating an
+// unhandled promise rejection. ask() will retry loading if necessary.
+loadEngine().catch((error) => {
+  updateStatus(error.message);
 });
