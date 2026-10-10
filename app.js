@@ -1,4 +1,3 @@
-
 (() => {
   'use strict';
 
@@ -28,9 +27,7 @@
     '#dialogContent'
   ];
 
-  const missingElements = requiredElements.filter(
-    selector => !$(selector)
-  );
+  const missingElements = requiredElements.filter(selector => !$(selector));
 
   if (missingElements.length) {
     console.error('Missing HTML elements:', missingElements);
@@ -50,10 +47,7 @@
           {
             id: String(topic.section ?? 'other'),
             label: String(
-              topic.sectionName ||
-              topic.sectionLabel ||
-              topic.section ||
-              'Other'
+              topic.sectionName || topic.sectionLabel || topic.section || 'Other'
             )
           }
         ])
@@ -67,10 +61,7 @@
 
   function loadProgress() {
     try {
-      const value = JSON.parse(
-        localStorage.getItem(storageKey) || '[]'
-      );
-
+      const value = JSON.parse(localStorage.getItem(storageKey) || '[]');
       return new Set(Array.isArray(value) ? value : []);
     } catch (error) {
       console.warn('Could not load saved progress.', error);
@@ -80,10 +71,7 @@
 
   function saveProgress() {
     try {
-      localStorage.setItem(
-        storageKey,
-        JSON.stringify([...completed])
-      );
+      localStorage.setItem(storageKey, JSON.stringify([...completed]));
     } catch (error) {
       console.warn('Could not save progress in this browser.', error);
     }
@@ -113,9 +101,7 @@
   }
 
   function getTopicSummary(topic) {
-    return topic.summary ||
-      topic.description ||
-      'Open this topic to study its content.';
+    return topic.summary || topic.description || 'Open this topic to study its content.';
   }
 
   function getTopicSection(topic) {
@@ -123,21 +109,15 @@
   }
 
   function getSectionLabel(id) {
-    const section = sections.find(
-      item => item.id === String(id)
-    );
+    const section = sections.find(item => item.id === String(id));
 
     if (section) {
       return section.label.replace(/^\d+\.\s*/, '');
     }
 
-    const topic = topics.find(
-      item => getTopicSection(item) === String(id)
-    );
+    const topic = topics.find(item => getTopicSection(item) === String(id));
 
-    return topic?.sectionName ||
-      topic?.sectionLabel ||
-      String(id);
+    return topic?.sectionName || topic?.sectionLabel || String(id);
   }
 
   function renderFilters() {
@@ -149,23 +129,19 @@
     $('#sectionFilters').innerHTML = filters.map(section => `
       <button
         type="button"
-        class="filter-chip ${
-          String(section.id) === activeSection ? 'active' : ''
-        }"
+        class="filter-chip ${String(section.id) === activeSection ? 'active' : ''}"
         data-section="${escapeHTML(section.id)}"
         aria-pressed="${String(section.id) === activeSection}"
       >${escapeHTML(section.label)}</button>
     `).join('');
 
-    $('#sectionFilters')
-      .querySelectorAll('[data-section]')
-      .forEach(button => {
-        button.addEventListener('click', () => {
-          activeSection = button.dataset.section;
-          renderFilters();
-          renderTopics();
-        });
+    $('#sectionFilters').querySelectorAll('[data-section]').forEach(button => {
+      button.addEventListener('click', () => {
+        activeSection = button.dataset.section;
+        renderFilters();
+        renderTopics();
       });
+    });
   }
 
   function renderTopics() {
@@ -189,16 +165,14 @@
         ...keywords
       ].join(' ').toLowerCase();
 
-      return matchesSection &&
-        (!query || searchableText.includes(query));
+      return matchesSection && (!query || searchableText.includes(query));
     });
 
     if (topics.length === 0) {
       $('#topicGrid').innerHTML = `
         <p class="empty-state">
-          No topic data has loaded. Check that content.js,
-          content2.js, content3.js and content4.js load
-          successfully before app.js.
+          No topic data has loaded. Check that content.js, content2.js,
+          content3.js and content4.js load successfully before app.js.
         </p>
       `;
 
@@ -217,20 +191,15 @@
           <div class="topic-card-top">
             <span class="topic-number">
               ${String(index + 1).padStart(2, '0')} ·
-              ${escapeHTML(
-                getSectionLabel(getTopicSection(topic))
-              )}
+              ${escapeHTML(getSectionLabel(getTopicSection(topic)))}
             </span>
-            ${isCompleted
-              ? '<span class="done-mark">✓ Done</span>'
-              : ''}
+            ${isCompleted ? '<span class="done-mark">✓ Done</span>' : ''}
           </div>
 
           <h3>${escapeHTML(title)}</h3>
           <p>${escapeHTML(summary)}</p>
 
-          <button type="button"
-            data-topic="${escapeHTML(topic.id)}">
+          <button type="button" data-topic="${escapeHTML(topic.id)}">
             Study this topic →
           </button>
         </article>
@@ -239,31 +208,22 @@
 
     $('#noResults').hidden = filtered.length > 0;
 
-    $('#topicGrid')
-      .querySelectorAll('[data-topic]')
-      .forEach(button => {
-        button.addEventListener('click', () => {
-          openTopic(button.dataset.topic);
-        });
-      });
+    $('#topicGrid').querySelectorAll('[data-topic]').forEach(button => {
+      button.addEventListener('click', () => openTopic(button.dataset.topic));
+    });
 
     updateProgress();
   }
 
   function openTopic(id) {
-    const topic = topics.find(
-      item => String(item.id) === String(id)
-    );
+    const topic = topics.find(item => String(item.id) === String(id));
 
     if (!topic) {
       console.error('Topic not found:', id);
       return;
     }
 
-    const points = Array.isArray(topic.points)
-      ? topic.points
-      : [];
-
+    const points = Array.isArray(topic.points) ? topic.points : [];
     const isCompleted = completed.has(topic.id);
 
     const pointsHTML = points.length
@@ -280,12 +240,8 @@
           if (point && typeof point === 'object') {
             return `
               <li>
-                <strong>${escapeHTML(
-                  point.title || point.name || ''
-                )}:</strong>
-                ${escapeHTML(
-                  point.explanation || point.description || ''
-                )}
+                <strong>${escapeHTML(point.title || point.name || '')}:</strong>
+                ${escapeHTML(point.explanation || point.description || '')}
               </li>
             `;
           }
@@ -298,10 +254,7 @@
 
     $('#dialogContent').innerHTML = `
       <p class="eyebrow">
-        ${escapeHTML(
-          topic.sectionName ||
-          getSectionLabel(getTopicSection(topic))
-        )}
+        ${escapeHTML(topic.sectionName || getSectionLabel(getTopicSection(topic)))}
       </p>
 
       <h2>${escapeHTML(title)}</h2>
@@ -309,47 +262,30 @@
 
       <div class="definition-box">
         <strong>Key definition</strong>
-        <p>${escapeHTML(
-          topic.definition ||
-          'A definition has not been added yet.'
-        )}</p>
+        <p>${escapeHTML(topic.definition || 'A definition has not been added yet.')}</p>
       </div>
 
       <h3>What you need to know</h3>
       <ul>${pointsHTML}</ul>
 
       <h3>Business example</h3>
-      <p>${escapeHTML(
-        topic.example ||
-        'A business example has not been added yet.'
-      )}</p>
+      <p>${escapeHTML(topic.example || 'A business example has not been added yet.')}</p>
 
       <div class="exam-tip">
         <strong>Exam technique:</strong>
-        ${escapeHTML(
-          topic.examTip ||
-          'Explain your point and apply it to the business in the question.'
-        )}
+        ${escapeHTML(topic.examTip || 'Explain your point and apply it to the business in the question.')}
       </div>
 
       <h3>Check your understanding</h3>
-      <p><strong>${escapeHTML(
-        topic.question ||
-        'What is the most important idea you learned from this topic?'
-      )}</strong></p>
+      <p><strong>${escapeHTML(topic.question || 'What is the most important idea you learned from this topic?')}</strong></p>
 
       <details>
         <summary>Reveal a sample answer</summary>
-        <p>${escapeHTML(
-          topic.answer ||
-          'Try answering in your own words first, using the key definition and a relevant example.'
-        )}</p>
+        <p>${escapeHTML(topic.answer || 'Try answering in your own words first, using the key definition and a relevant example.')}</p>
       </details>
 
       <button type="button" id="markTopicDone" class="mark-done">
-        ${isCompleted
-          ? 'Mark as not completed'
-          : 'Mark topic as completed ✓'}
+        ${isCompleted ? 'Mark as not completed' : 'Mark topic as completed ✓'}
       </button>
     `;
 
@@ -374,14 +310,9 @@
   }
 
   function updateProgress() {
-    const count = topics.filter(
-      topic => completed.has(topic.id)
-    ).length;
-
+    const count = topics.filter(topic => completed.has(topic.id)).length;
     const total = topics.length;
-    const percent = total > 0
-      ? Math.round(count / total * 100)
-      : 0;
+    const percent = total > 0 ? Math.round(count / total * 100) : 0;
 
     $('#heroCompleted').textContent = count;
     $('#heroProgressBar').style.width = `${percent}%`;
@@ -405,8 +336,8 @@
     if (quizOrder.length === 0) {
       card.innerHTML = `
         <p class="empty-state">
-          No quiz questions have loaded. Check the content files
-          and confirm that they add questions to BUSINESS_QUIZ.
+          No quiz questions have loaded. Check the content files and
+          confirm that they add questions to BUSINESS_QUIZ.
         </p>
       `;
       return;
@@ -415,17 +346,13 @@
     quizIndex = Math.min(quizIndex, quizOrder.length - 1);
 
     const question = quizOrder[quizIndex];
-    const options = Array.isArray(question.options)
-      ? question.options
-      : [];
-
+    const options = Array.isArray(question.options) ? question.options : [];
     const correctAnswer = Number(question.answer);
 
     if (!options.length) {
       card.innerHTML = `
         <p class="empty-state">
-          This quiz question has no answer options.
-          Check its data in the content files.
+          This quiz question has no answer options. Check its data in the content files.
         </p>
       `;
       return;
@@ -436,18 +363,13 @@
         QUESTION ${quizIndex + 1} OF ${quizOrder.length}
       </span>
 
-      <h3>${escapeHTML(
-        question.q || question.question || 'Quiz question'
-      )}</h3>
+      <h3>${escapeHTML(question.q || question.question || 'Quiz question')}</h3>
 
       <div class="answer-list">
         ${options.map((option, index) => {
           let className = 'answer-option';
 
-          if (
-            selectedQuizAnswer !== null &&
-            index === correctAnswer
-          ) {
+          if (selectedQuizAnswer !== null && index === correctAnswer) {
             className += ' correct';
           } else if (
             selectedQuizAnswer === index &&
@@ -463,9 +385,7 @@
               data-answer="${index}"
               ${selectedQuizAnswer !== null ? 'disabled' : ''}
             >
-              <span class="option-letter">
-                ${String.fromCharCode(65 + index)}
-              </span>
+              <span class="option-letter">${String.fromCharCode(65 + index)}</span>
               <span>${escapeHTML(option)}</span>
             </button>
           `;
@@ -474,15 +394,8 @@
 
       ${selectedQuizAnswer !== null ? `
         <div class="quiz-feedback">
-          <strong>${
-            selectedQuizAnswer === correctAnswer
-              ? 'Correct!'
-              : 'Not quite.'
-          }</strong>
-          <p>${escapeHTML(
-            question.explanation ||
-            'Review the topic and try another question.'
-          )}</p>
+          <strong>${selectedQuizAnswer === correctAnswer ? 'Correct!' : 'Not quite.'}</strong>
+          <p>${escapeHTML(question.explanation || 'Review the topic and try another question.')}</p>
         </div>
       ` : ''}
 
@@ -493,11 +406,8 @@
             : 'Take a moment to read the explanation.'}
         </span>
 
-        <button type="button" id="nextQuiz"
-          ${selectedQuizAnswer === null ? 'disabled' : ''}>
-          ${quizIndex === quizOrder.length - 1
-            ? 'Try a new set'
-            : 'Next question →'}
+        <button type="button" id="nextQuiz" ${selectedQuizAnswer === null ? 'disabled' : ''}>
+          ${quizIndex === quizOrder.length - 1 ? 'Try a new set' : 'Next question →'}
         </button>
       </div>
     `;
@@ -524,12 +434,9 @@
     });
   }
 
-  // AI Tutor: send the question and loaded learning materials
-  // to our own content-based Netlify function. No OpenAI call
-  // is made by this frontend code.
   async function askTutor() {
     const question = $('#tutorQuestion').value.trim();
-    const topic = $('#tutorTopic')?.value || '';
+    const selectedTopic = $('#tutorTopic').value;
 
     $('#tutorError').hidden = true;
     $('#tutorAnswer').hidden = true;
@@ -540,58 +447,26 @@
       return;
     }
 
-    if (!topics.length && !quizQuestions.length) {
-      $('#tutorError').textContent =
-        'Business learning content has not loaded. Please refresh the page and try again.';
-      $('#tutorError').hidden = false;
-      return;
-    }
-
     const button = $('#askButton');
     button.disabled = true;
-    button.textContent = 'Searching Business content…';
 
     try {
-      const response = await fetch('/.netlify/functions/ai', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          question,
-          topic,
-          topics,
-          quizQuestions
-        })
-      });
+      button.textContent = 'Starting local AI…';
 
-      let data = {};
-
-      try {
-        data = await response.json();
-      } catch {
-        data = {};
+      if (!window.BusinessLocalAIReady) {
+        throw new Error('The local AI module has not loaded. Refresh the page and try again.');
       }
 
-      if (!response.ok) {
-        throw new Error(
-          data.error ||
-          'The Business Tutor could not search the content.'
-        );
-      }
+      const localAI = await window.BusinessLocalAIReady;
+      button.textContent = 'Loading model if needed…';
+      const answer = await localAI.ask(question, selectedTopic);
 
-      if (!data.answer) {
-        throw new Error(
-          'No relevant answer was returned. Try using a specific Business term.'
-        );
-      }
-
-      $('#tutorAnswer').textContent = data.answer;
+      $('#tutorAnswer').textContent = answer;
       $('#tutorAnswer').hidden = false;
     } catch (error) {
-      $('#tutorError').textContent =
-        error.message ||
-        'The tutor could not search the content. Please try again.';
+      console.error('Local Business AI error:', error);
+      $('#tutorError').textContent = error.message ||
+        'The local AI could not answer. Check browser compatibility and your internet connection.';
       $('#tutorError').hidden = false;
     } finally {
       button.disabled = false;
@@ -613,7 +488,7 @@
     }
   });
 
-  // AI Tutor character count.
+  // AI tutor character count.
   $('#tutorQuestion').addEventListener('input', () => {
     $('#questionCount').textContent =
       `${$('#tutorQuestion').value.length}/2000`;
@@ -646,10 +521,7 @@
     const nav = $('#mainNav');
     const isOpen = nav.classList.toggle('open');
 
-    $('#menuToggle').setAttribute(
-      'aria-expanded',
-      String(isOpen)
-    );
+    $('#menuToggle').setAttribute('aria-expanded', String(isOpen));
   });
 
   $('#mainNav').querySelectorAll('a').forEach(link => {
