@@ -6,16 +6,16 @@ const STOP_WORDS = new Set([
   "for", "from", "with", "about", "into", "than", "then", "that", "this",
   "these", "those", "it", "its", "they", "them", "their", "he", "she",
   "we", "you", "your", "i", "me", "my", "and", "or", "but", "if", "as",
-  "what", "which", "who", "when", "where", "why", "how", "explain",
-  "describe", "tell", "give", "show", "please", "business", "businesses"
+  "what", "which", "who", "when", "where", "why", "how", "please",
+  "explain", "describe", "tell", "give", "show", "business", "businesses"
 ]);
 
 const ALIASES = {
   "boston matrix": [
     "boston matrix", "bcg matrix", "growth share matrix",
-    "star", "stars", "cash cow", "cash cows",
-    "question mark", "question marks", "dog", "dogs",
-    "market growth", "market share"
+    "stars", "star", "cash cows", "cash cow",
+    "question marks", "question mark", "dogs",
+    "market growth", "relative market share"
   ],
   "marketing mix": [
     "marketing mix", "4ps", "product price place promotion"
@@ -26,18 +26,18 @@ const ALIASES = {
   ],
   "cash flow": [
     "cash flow", "cash inflow", "cash outflow",
-    "cash flow forecast", "liquidity"
+    "cash flow forecast", "net cash flow"
   ],
   "working capital": [
     "working capital", "current assets", "current liabilities"
   ],
-  "motivation": [
-    "motivation", "motivating employees", "financial rewards",
-    "non-financial rewards", "job satisfaction"
-  ],
   "market segmentation": [
     "market segmentation", "target market", "demographic",
     "geographic", "psychographic"
+  ],
+  "market research": [
+    "market research", "primary research", "secondary research",
+    "qualitative", "quantitative", "sample"
   ],
   "economies of scale": [
     "economies of scale", "diseconomies of scale",
@@ -47,38 +47,29 @@ const ALIASES = {
     "sources of finance", "retained profit", "bank loan",
     "overdraft", "share capital", "trade credit"
   ],
-  "recruitment": [
-    "recruitment", "selection", "job description",
-    "person specification", "internal recruitment",
-    "external recruitment"
-  ],
-  "market research": [
-    "market research", "primary research", "secondary research",
-    "qualitative", "quantitative", "sample"
-  ],
-  "business objectives": [
-    "business objectives", "profit maximisation", "survival",
-    "growth", "market share", "social objectives"
+  "motivation": [
+    "motivation", "motivating employees", "financial rewards",
+    "non-financial rewards", "job satisfaction", "maslow", "taylor"
   ],
   "stakeholders": [
     "stakeholders", "owners", "employees", "customers",
     "suppliers", "government", "local community"
   ],
-  "cash flow forecast": [
-    "cash flow forecast", "opening balance", "closing balance",
-    "net cash flow", "cash inflows", "cash outflows"
+  "business objectives": [
+    "business objectives", "profit maximisation", "survival",
+    "growth", "market share", "social objectives"
   ],
   "income statement": [
     "income statement", "revenue", "cost of sales",
     "gross profit", "operating profit", "net profit"
   ],
-  "marketing": [
-    "marketing", "market research", "marketing mix",
-    "promotion", "pricing", "distribution"
+  "recruitment": [
+    "recruitment", "selection", "job description",
+    "person specification", "internal recruitment", "external recruitment"
   ],
-  "motivation theories": [
-    "maslow", "taylor", "hierarchy of needs",
-    "piece rate", "time rate"
+  "cash flow forecast": [
+    "cash flow forecast", "opening balance", "closing balance",
+    "net cash flow", "cash inflows", "cash outflows"
   ]
 };
 
@@ -136,15 +127,15 @@ function collectDocuments(input) {
   let count = 0;
 
   function walk(value, path, depth) {
-    if (value == null || depth > 12 || count > 2500) return;
+    if (value == null || depth > 12 || count >= 3000) return;
 
     if (typeof value === "string" || typeof value === "number") {
       const text = cleanText(value);
-      if (text.length >= 20 && text.length <= 20000) {
+
+      if (text.length >= 18 && text.length <= 20000) {
         documents.push({
           title: path || "Business course content",
-          text,
-          source: path || "Course content"
+          text
         });
         count++;
       }
@@ -152,36 +143,29 @@ function collectDocuments(input) {
     }
 
     if (Array.isArray(value)) {
-      value.forEach((item, index) =>
-        walk(item, path ? `${path} ${index + 1}` : "", depth + 1)
-      );
+      value.forEach((item, index) => {
+        walk(item, path, depth + 1);
+      });
       return;
     }
 
     if (typeof value !== "object" || visited.has(value)) return;
     visited.add(value);
 
-    const preferredTitle =
+    const title =
       value.title ||
       value.heading ||
       value.name ||
       value.topic ||
       value.label ||
-      value.question ||
       "";
 
-    const nextPath = preferredTitle
-      ? cleanText(preferredTitle).slice(0, 140)
-      : path;
+    const nextPath = cleanText(title).slice(0, 140) || path;
 
     for (const [key, child] of Object.entries(value)) {
-      if (
-        key === "id" ||
-        key === "image" ||
-        key === "icon" ||
-        key === "url" ||
-        key === "href"
-      ) continue;
+      if ([
+        "id", "image", "icon", "url", "href"
+      ].includes(key)) continue;
 
       walk(child, nextPath || key, depth + 1);
     }
@@ -189,7 +173,7 @@ function collectDocuments(input) {
 
   walk(input, "", 0);
 
-  // Split large pieces of lesson content into smaller answer-sized pieces.
+  // Break long lessons into smaller passages.
   const chunks = [];
 
   for (const doc of documents) {
@@ -206,14 +190,10 @@ function collectDocuments(input) {
     let group = [];
 
     for (const sentence of sentences) {
-      if (
-        group.length &&
-        group.join(" ").length + sentence.length > 650
-      ) {
-        chunks.push({
-          ...doc,
-          text: group.join(" ")
-        });
+      const currentLength = group.join(" ").length;
+
+      if (group.length && currentLength + sentence.length > 700) {
+        chunks.push({ ...doc, text: group.join(" ") });
         group = [];
       }
 
@@ -221,14 +201,10 @@ function collectDocuments(input) {
     }
 
     if (group.length) {
-      chunks.push({
-        ...doc,
-        text: group.join(" ")
-      });
+      chunks.push({ ...doc, text: group.join(" ") });
     }
   }
 
-  // Remove duplicate passages.
   const seen = new Set();
 
   return chunks.filter(doc => {
@@ -242,7 +218,6 @@ function collectDocuments(input) {
 function findConcept(question) {
   const q = normalise(question);
 
-  // Match longer and more specific concepts first.
   const concepts = Object.entries(ALIASES)
     .sort((a, b) => b[0].length - a[0].length);
 
@@ -258,184 +233,284 @@ function findConcept(question) {
   return null;
 }
 
-function scoreDocument(doc, question, queryWords, concept) {
-  const text = normalise(doc.text);
-  const title = normalise(doc.title);
-  let score = 0;
-
-  for (const word of queryWords) {
-    if (title.includes(word)) score += 7;
-    if (text.includes(word)) score += 2;
-
-    // Give a small extra reward for exact whole-word matches.
-    const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    if (new RegExp(`\\b${escaped}\\b`).test(text)) score += 1;
-  }
-
+function getIntent(question) {
   const q = normalise(question);
 
-  if (q.length >= 4 && text.includes(q)) score += 15;
-  if (title && q.includes(title) && title.length > 3) score += 12;
-
-  if (concept) {
-    const matchedPhrases = concept.phrases.filter(phrase =>
-      text.includes(normalise(phrase))
-    );
-
-    score += matchedPhrases.length * 4;
-
-    if (text.includes(normalise(concept.concept))) score += 12;
+  if (/\b(in detail|detailed|long answer|longer answer|in depth|thoroughly|comprehensive|step by step|full explanation|teach me|everything about)\b/.test(q)) {
+    return "detailed";
   }
 
-  return score;
-}
-
-function getQuestionType(question) {
-  const q = normalise(question);
-
-  if (/^(what is|define|meaning of|what does .* mean)/.test(q)) {
-    return "definition";
+  if (/\b(example|for example|real life|real world|case study)\b/.test(q)) {
+    return "example";
   }
 
-  if (/^(why|give a reason|state a reason)/.test(q)) {
-    return "why";
+  if (/\b(advantages|benefits|strengths|positive effects)\b/.test(q)) {
+    return "advantages";
   }
 
-  if (/^(how|in what way)/.test(q)) {
-    return "how";
+  if (/\b(disadvantages|drawbacks|limitations|weaknesses|negative effects)\b/.test(q)) {
+    return "disadvantages";
   }
 
-  if (/^(compare|difference between|distinguish)/.test(q)) {
+  if (/\b(compare|comparison|difference between|different from|whereas)\b/.test(q)) {
     return "compare";
   }
 
-  if (/^(calculate|work out|find the|how much|what is the .* percentage)/.test(q)) {
-    return "calculation";
-  }
-
-  if (/^(evaluate|assess|to what extent|discuss)/.test(q)) {
+  if (/\b(evaluate|evaluation|assess|to what extent|discuss)\b/.test(q)) {
     return "evaluate";
   }
 
-  if (/^(give|name|identify|state|list)/.test(q)) {
+  if (/\b(calculate|calculation|work out|percentage|formula)\b/.test(q)) {
+    return "calculation";
+  }
+
+  if (/^(what is|define|definition|meaning of|what does)/.test(q)) {
+    return "definition";
+  }
+
+  if (/^(why|what are the reasons|give a reason)/.test(q)) {
+    return "why";
+  }
+
+  if (/^(how|in what way|how does|how can)/.test(q)) {
+    return "how";
+  }
+
+  if (/^(give|name|identify|state|list)\b/.test(q)) {
     return "short";
   }
 
   return "general";
 }
 
-function selectUsefulSentences(documents, question, queryWords, concept, type) {
-  const candidates = [];
+function scoreDocument(doc, queryWords, concept, question) {
+  const text = normalise(doc.text);
+  const title = normalise(doc.title);
+  let score = 0;
+
+  for (const word of queryWords) {
+    if (title.includes(word)) score += 5;
+    if (text.includes(word)) score += 2;
+
+    const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    if (new RegExp(`\\b${escaped}\\b`).test(text)) {
+      score += 1;
+    }
+  }
+
+  const q = normalise(question);
+
+  if (q.length > 4 && text.includes(q)) score += 10;
+
+  if (concept) {
+    if (text.includes(normalise(concept.concept))) score += 10;
+
+    for (const phrase of concept.phrases) {
+      const p = normalise(phrase);
+      if (p.length > 3 && text.includes(p)) score += 3;
+    }
+  }
+
+  return score;
+}
+
+function splitSentences(text) {
+  return cleanText(text)
+    .split(/(?<=[.!?])\s+|\n+/)
+    .map(cleanText)
+    .filter(sentence => sentence.length >= 18 && sentence.length <= 700);
+}
+
+function sentenceRelevance(sentence, queryWords, concept, intent) {
+  const text = normalise(sentence);
+  let score = 0;
+
+  for (const word of queryWords) {
+    if (text.includes(word)) score += 2;
+  }
+
+  if (concept && text.includes(normalise(concept.concept))) score += 8;
+
+  const signals = {
+    example: /\b(for example|such as|for instance|e\.g\.|example|including)\b/i,
+    advantages: /\b(advantage|benefit|improve|increase|help|allow|enable|reduce|save)\b/i,
+    disadvantages: /\b(disadvantage|drawback|risk|problem|limit|however|cost|difficult)\b/i,
+    why: /\b(because|therefore|as a result|this means|leads to|allows|helps|enables)\b/i,
+    how: /\b(by |through|using|allows|enables|means that|as a result)\b/i,
+    evaluate: /\b(however|although|depends|therefore|in conclusion|whereas|but)\b/i,
+    calculation: /\b(formula|divide|multiply|subtract|calculate|percentage|total|contribution)\b/i
+  };
+
+  if (signals[intent]?.test(sentence)) score += 4;
+
+  return score;
+}
+
+function selectPassages(documents, question, queryWords, concept, intent) {
+  const results = [];
 
   for (const doc of documents) {
-    const sentences = doc.text
-      .split(/(?<=[.!?])\s+|\n+/)
-      .map(cleanText)
-      .filter(sentence => sentence.length >= 18 && sentence.length <= 420);
+    const docScore = scoreDocument(doc, queryWords, concept, question);
 
-    for (const sentence of sentences) {
-      const score = scoreDocument(
-        { ...doc, text: sentence },
-        question,
-        queryWords,
-        concept
-      );
+    for (const sentence of splitSentences(doc.text)) {
+      const sentenceScore =
+        sentenceRelevance(sentence, queryWords, concept, intent);
 
-      if (score > 0) {
-        candidates.push({
+      const total = docScore + sentenceScore;
+
+      if (total > 0) {
+        results.push({
           text: sentence,
-          score,
+          score: total,
           title: doc.title
         });
       }
     }
   }
 
-  candidates.sort((a, b) => b.score - a.score);
+  results.sort((a, b) => b.score - a.score);
 
-  const selected = [];
   const seen = new Set();
+  const selected = [];
 
-  for (const candidate of candidates) {
-    const key = normalise(candidate.text);
+  const limit =
+    intent === "detailed" ? 12 :
+    intent === "evaluate" ? 8 : 5;
+
+  for (const item of results) {
+    const key = normalise(item.text);
 
     if (seen.has(key)) continue;
 
-    // Don't include passages that are only loosely related.
-    if (candidate.score < (concept ? 5 : 4)) continue;
+    if (item.score < (concept ? 4 : 5)) continue;
 
-    // Limit how much material is returned to the student.
-    if (selected.length >= (type === "evaluate" ? 4 : 3)) break;
+    const currentWords = new Set(words(item.text));
 
-    // Avoid repeating almost identical content.
-    const candidateWords = new Set(words(candidate.text));
-    const duplicate = selected.some(item => {
-      const existingWords = new Set(words(item.text));
-      if (!candidateWords.size || !existingWords.size) return false;
+    const duplicate = selected.some(existing => {
+      const oldWords = new Set(words(existing.text));
+
+      if (!currentWords.size || !oldWords.size) return false;
 
       let overlap = 0;
-      for (const word of candidateWords) {
-        if (existingWords.has(word)) overlap++;
+      for (const word of currentWords) {
+        if (oldWords.has(word)) overlap++;
       }
 
-      return overlap / Math.min(candidateWords.size, existingWords.size) > 0.8;
+      return overlap / Math.min(currentWords.size, oldWords.size) > 0.85;
     });
 
     if (duplicate) continue;
 
-    selected.push(candidate);
+    selected.push(item);
     seen.add(key);
+
+    if (selected.length >= limit) break;
   }
 
   return selected;
 }
 
-function makeAnswer(question, selected, type, concept) {
+function makeAnswer(question, selected, intent, concept) {
   if (!selected.length) {
-    const topic = concept ? concept.concept : "this question";
+    const subject = concept?.concept || "that specific topic";
 
     return (
-      `I couldn't find enough relevant information about ${topic} in the ` +
-      `Business content currently loaded on this website. I don't want to ` +
-      `guess and teach you something incorrect. Try using the topic's exact ` +
-      `name or check whether the relevant lesson has been added.`
+      `I couldn't find enough relevant information about ${subject} in ` +
+      `the lessons currently available on this website. I don't want to ` +
+      `give you a made-up answer. Try using the exact term from your lesson, ` +
+      `or check whether the topic has been added to the website.`
     );
   }
 
   const sentences = selected.map(item => item.text);
-  const q = normalise(question);
+  const subject = concept?.concept || "this topic";
 
-  // Return the requested information rather than a whole lesson.
-  if (type === "definition" || type === "short") {
+  if (intent === "definition") {
+    return (
+      `In simple terms, ${subject} means:\n\n` +
+      `${sentences.slice(0, 2).join(" ")}`
+    );
+  }
+
+  if (intent === "short") {
     return sentences.slice(0, 2).join(" ");
   }
 
-  if (type === "why" || type === "how") {
-    // Prefer a direct explanation, reason, consequence, or example.
-    const causal = sentences.filter(sentence =>
-      /\b(because|therefore|so that|this means|as a result|allows|helps|leads to|enables|reduces|increases|improves|prevents|results in)\b/i
-        .test(sentence)
+  if (intent === "example") {
+    return (
+      `Let's make it practical. Here is the most relevant information ` +
+      `I found about ${subject}:\n\n` +
+      sentences.slice(0, 4).join("\n\n") +
+      `\n\nUse a specific business from your own case study if your exam question gives you one.`
+    );
+  }
+
+  if (intent === "advantages") {
+    return (
+      `The main benefits to consider are:\n\n` +
+      sentences.slice(0, 5).map(s => `- ${s}`).join("\n\n")
+    );
+  }
+
+  if (intent === "disadvantages") {
+    return (
+      `The main drawbacks to consider are:\n\n` +
+      sentences.slice(0, 5).map(s => `- ${s}`).join("\n\n")
+    );
+  }
+
+  if (intent === "why" || intent === "how") {
+    const causal = sentences.filter(s =>
+      /\b(because|therefore|as a result|this means|leads to|allows|helps|enables|reduces|increases|improves)\b/i.test(s)
     );
 
-    const chosen = unique([...causal, ...sentences]).slice(0, 3);
-    return chosen.join(" ");
+    const ordered = unique([...causal, ...sentences]).slice(0, 5);
+
+    return (
+      `The key idea is how ${subject} affects the business.\n\n` +
+      ordered.join("\n\n") +
+      `\n\nFor an exam answer, connect the point to its effect on the business, such as costs, revenue, profit or customer satisfaction, where relevant.`
+    );
   }
 
-  if (type === "compare") {
-    return sentences.slice(0, 3).join(" ");
+  if (intent === "compare") {
+    return (
+      `The important points to compare are:\n\n` +
+      sentences.slice(0, 6).map(s => `- ${s}`).join("\n\n") +
+      `\n\nIn an exam, make the difference clear rather than describing each point separately.`
+    );
   }
 
-  if (type === "calculation") {
-    return sentences.slice(0, 3).join(" ");
+  if (intent === "calculation") {
+    return (
+      `Let's focus on the calculation information available in your course:\n\n` +
+      sentences.slice(0, 5).join("\n\n") +
+      `\n\nIf you send the actual numbers in the question, I can help you work through the calculation step by step using the relevant formula from your course content.`
+    );
   }
 
-  if (type === "evaluate") {
-    const answer = sentences.slice(0, 4).join(" ");
-    return `${answer}\n\nFor an evaluation, use the evidence above to explain the likely impact on the business, then make a justified conclusion based on the situation in the question.`;
+  if (intent === "evaluate") {
+    return (
+      `Here are the most relevant points I found about ${subject}:\n\n` +
+      sentences.slice(0, 8).join("\n\n") +
+      `\n\n**How to build an evaluation:** explain a benefit or drawback, develop its effect on the business, consider the opposing side, and finish with a justified conclusion based on the case study.`
+    );
   }
 
-  // If the source is long, keep the response concise.
-  return sentences.slice(0, 3).join(" ");
+  if (intent === "detailed") {
+    return (
+      `Sure — let's break ${subject} down properly.\n\n` +
+      sentences.slice(0, 12).join("\n\n") +
+      `\n\n**How to use this in an exam:** choose the points that answer the exact question, explain why they matter, and develop their impact on the business. Use evidence from the case study whenever it is provided.`
+    );
+  }
+
+  return (
+    `Here's the information most relevant to your question:\n\n` +
+    sentences.slice(0, 5).join("\n\n") +
+    `\n\nIf you want, ask me about one part of this topic and I can focus the explanation on that specific point.`
+  );
 }
 
 exports.handler = async (event) => {
@@ -458,65 +533,60 @@ exports.handler = async (event) => {
     return reply(400, { error: "Type a question first." });
   }
 
-  // Only search content supplied by the website.
-  const websiteContent = {
+  const content = {
     topics: Array.isArray(body.topics) ? body.topics : [],
     quizQuestions: Array.isArray(body.quizQuestions)
       ? body.quizQuestions
       : []
   };
 
-  const documents = collectDocuments(websiteContent);
+  const documents = collectDocuments(content);
 
   if (!documents.length) {
     return reply(200, {
       answer:
-        "I couldn't access any Business lesson content in this request. " +
-        "Check that your website is sending BUSINESS_TOPICS and BUSINESS_QUIZ " +
-        "to the tutor."
+        "I couldn't access the lesson content in this request. Check that " +
+        "your website is sending BUSINESS_TOPICS and BUSINESS_QUIZ to the tutor."
     });
   }
 
   const concept = findConcept(question);
+  const intent = getIntent(question);
+
   const queryWords = unique([
     ...words(question),
     ...words(topic)
   ]);
 
-  // Search all content, then use the best matching passages only.
   const ranked = documents
     .map(doc => ({
       ...doc,
-      score: scoreDocument(doc, question, queryWords, concept)
+      score: scoreDocument(doc, queryWords, concept, question)
     }))
     .sort((a, b) => b.score - a.score);
 
-  const bestScore = ranked[0]?.score || 0;
-
-  // Don't confidently answer a question using unrelated lesson material.
-  if (bestScore < 4) {
+  if (!ranked.length || ranked[0].score < 4) {
     return reply(200, {
       answer:
-        "I couldn't find a close match for that question in the Business " +
-        "content on this website. Try including the exact topic or key term " +
-        "from your lesson, or check whether that content has been added."
+        "I couldn't find a close match for that question in the available " +
+        "Business lessons. Try including the exact topic or key term from " +
+        "your lesson, or check whether that topic has been added."
     });
   }
 
-  const type = getQuestionType(question);
-  const selected = selectUsefulSentences(
+  const selected = selectPassages(
     documents,
     question,
     queryWords,
     concept,
-    type
+    intent
   );
 
-  const answer = makeAnswer(question, selected, type, concept);
+  const answer = makeAnswer(question, selected, intent, concept);
 
   return reply(200, {
     answer,
     topic: concept?.concept || topic || "Business",
-    sources: unique(selected.map(item => item.title)).slice(0, 3)
+    sources: unique(selected.map(item => item.title)).slice(0, 4)
   });
 };
