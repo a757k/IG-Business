@@ -1,5 +1,5 @@
-
-const CACHE_NAME = "business-igcse-pwa-v1";
+```javascript
+const CACHE_NAME = "business-igcse-pwa-v2";
 
 const APP_FILES = [
   "./",
@@ -10,18 +10,23 @@ const APP_FILES = [
   "./content2.js",
   "./content3.js",
   "./content4.js",
-  "./local-ai.js",
   "./manifest.json",
   "./app-icon.svg"
 ];
 
+// Install the new service worker and prepare the offline cache.
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+
       await Promise.all(
         APP_FILES.map(async (file) => {
           try {
-            const response = await fetch(file);
+            const response = await fetch(file, {
+              cache: "no-cache"
+            });
+
             if (response.ok) {
               await cache.put(file, response);
             }
@@ -30,73 +35,112 @@ self.addEventListener("install", (event) => {
           }
         })
       );
+
       await self.skipWaiting();
-    })
+    })()
   );
 });
 
+// Remove outdated caches and activate this version.
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      )
-    ).then(() => self.clients.claim())
+    (async () => {
+      const cacheNames = await caches.keys();
+
+      await Promise.all(
+        cacheNames
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => caches.delete(name))
+      );
+
+      await self.clients.claim();
+    })()
   );
 });
 
+// Prefer fresh online files; use cached files when offline.
 self.addEventListener("fetch", (event) => {
   const request = event.request;
+
+  if (request.method !== "GET") {
+    return;
+  }
+
   const url = new URL(request.url);
 
-  // Only handle this website, and leave non-GET requests alone.
-  if (
-    request.method !== "GET" ||
-    url.origin !== self.location.origin
-  ) {
+  // Do not intercept requests to other websites.
+  if (url.origin !== self.location.origin) {
     return;
   }
 
-  // For page navigation, prefer the latest page; use the cache offline.
+  // Always check the network first for page navigation.
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
+      (async () => {
+        try {
+          const response = await fetch(request, {
+            cache: "no-cache"
+          });
+
           if (response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) =>
-              cache.put("./index.html", copy)
-            );
+            const cache = await caches.open(CACHE_NAME);
+            await cache.put("./index.html", response.clone());
           }
+
           return response;
-        })
-        .catch(async () => {
-          return (
-            await caches.match(request) ||
-            await caches.match("./index.html") ||
-            Response.error()
+        } catch (error) {
+          const cachedPage = await caches.match("./index.html");
+
+          if (cachedPage) {
+            return cachedPage;
+          }
+
+          return new Response(
+            "You are offline and this page is not cached yet.",
+            {
+              status: 503,
+              headers: {
+                "Content-Type": "text/plain; charset=utf-8"
+              }
+            }
           );
-        })
+        }
+      })()
     );
+
     return;
   }
 
-  // For local files, use the cache first and fetch if missing.
+  // Only cache files belonging to this website.
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
 
-      return fetch(request).then((response) => {
+      try {
+        const response = await fetch(request, {
+          cache: "no-cache"
+        });
+
         if (response.ok && response.type === "basic") {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) =>
-            cache.put(request, copy)
-          );
+          await cache.put(request, response.clone());
         }
+
         return response;
-      });
-    })
+      } catch (error) {
+        const cachedResponse = await cache.match(request);
+
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        return new Response("This resource is unavailable offline.", {
+          status: 503,
+          headers: {
+            "Content-Type": "text/plain; charset=utf-8"
+          }
+        });
+      }
+    })()
   );
 });
+```
